@@ -16,7 +16,7 @@ This is a fully mobile responsive React + TypeScript app where you can command a
 
 ### Grid System
 - **100x100 squares**: Each square is 1 meter. The grid is fully numbered.
-- **Perimeter detection**: The rover can't leave the grid. If you try, you'll get a clear warning in the log and it will block the command.
+- **Perimeter detection**: The rover can't leave the grid, commands that would take the Rover out of bounds are cut short at the perimeter and blocked from going further.
 - **Draggable grid**: Drag to explore the grid around your rover.
 - **Return to Rover**: Click to return to the Rover after dragging the map around.
 
