@@ -23,7 +23,7 @@ This is a fully mobile responsive React + TypeScript app where you can command a
 ### Mission Log
 - **Latest at the top**: Every command you send (even in a batch) appears at the top of the log, so you always see the most recent action first.
 - **Clear feedback**: See exactly what happened after each command, including blocked moves and perimeter warnings.
-- **Persistent**: Your mission log is saved in your browser until Rover is reset with local storage.
+- **Persistent**: Your mission log is saved in your browser with local storage until Rover is reset.
 
 ### Reset & Error Handling
 - **Reset**: Click the reset button to start a new mission from square 1, facing South.
