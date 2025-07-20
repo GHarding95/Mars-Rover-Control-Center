@@ -1,5 +1,3 @@
-import React from 'react';
-
 const GridLegend: React.FC = () => (
   <div className="grid-legend">
     <div className="legend-item">

@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface RoverStatusProps {
   position: number;
   direction: 'North' | 'South' | 'East' | 'West';

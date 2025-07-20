@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import GridLegend from './GridLegend';
 
 interface GridCell {
@@ -133,13 +133,6 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
     };
   }, []);
 
-  const handleGridMouseEnter = () => {
-    document.body.style.overflow = 'hidden';
-  };
-  const handleGridMouseLeave = () => {
-    document.body.style.overflow = '';
-  };
-
   return (
     <div className="grid-section">
       <h2>Mars Surface Grid (Dynamic View)</h2>
@@ -149,7 +142,7 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
         ref={gridContainerRef}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
-        onMouseLeave={e => { handleMouseUp(); }}
+        onMouseLeave={handleMouseUp}
         onMouseMove={handleMouseMove}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}

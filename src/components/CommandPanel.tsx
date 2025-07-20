@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface CommandPanelProps {
   commands: string[];
   error: string;
