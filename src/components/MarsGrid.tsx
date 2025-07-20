@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import GridLegend from './GridLegend';
 
 interface GridCell {
@@ -20,6 +20,7 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
   const dragging = useRef(false);
   const lastPos = useRef<{ x: number; y: number } | null>(null);
   const [_, setDraggingState] = useState(false); // for re-render
+  const gridContainerRef = useRef<HTMLDivElement>(null);
 
   // Calculate rover's actual position
   const roverRow = Math.floor((roverPosition - 1) / 100) + 1;
@@ -35,6 +36,7 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
 
   // Mouse/touch drag handlers (same as before)
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
     dragging.current = true;
     lastPos.current = { x: e.clientX, y: e.clientY };
     setDraggingState(true);
@@ -46,6 +48,7 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
   };
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!dragging.current || !lastPos.current) return;
+    e.preventDefault();
     const dx = e.clientX - lastPos.current.x;
     const dy = e.clientY - lastPos.current.y;
     const cellSize = 25;
@@ -63,6 +66,7 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
     }
   };
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    e.preventDefault();
     dragging.current = true;
     lastPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     setDraggingState(true);
@@ -74,6 +78,7 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
   };
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
     if (!dragging.current || !lastPos.current) return;
+    e.preventDefault();
     const dx = e.touches[0].clientX - lastPos.current.x;
     const dy = e.touches[0].clientY - lastPos.current.y;
     const cellSize = 25;
@@ -91,22 +96,70 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
     }
   };
 
+  // Prevent scroll when mouse/touch is over grid
+  useEffect(() => {
+    const gridEl = gridContainerRef.current;
+    if (!gridEl) return;
+    let preventScroll = (e: Event) => {
+      e.preventDefault();
+    };
+    const enable = () => {
+      window.addEventListener('wheel', preventScroll, { passive: false } as any);
+      window.addEventListener('touchmove', preventScroll, { passive: false } as any);
+    };
+    const disable = () => {
+      window.removeEventListener('wheel', preventScroll, { passive: false } as any);
+      window.removeEventListener('touchmove', preventScroll, { passive: false } as any);
+    };
+    gridEl.addEventListener('mouseenter', enable);
+    gridEl.addEventListener('mouseleave', disable);
+    gridEl.addEventListener('touchstart', enable);
+    gridEl.addEventListener('touchend', disable);
+    gridEl.addEventListener('touchcancel', disable);
+    return () => {
+      disable();
+      gridEl.removeEventListener('mouseenter', enable);
+      gridEl.removeEventListener('mouseleave', disable);
+      gridEl.removeEventListener('touchstart', enable);
+      gridEl.removeEventListener('touchend', disable);
+      gridEl.removeEventListener('touchcancel', disable);
+    };
+  }, []);
+
+  // Disable scrolling when mouse is over the grid
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
+  const handleGridMouseEnter = () => {
+    document.body.style.overflow = 'hidden';
+  };
+  const handleGridMouseLeave = () => {
+    document.body.style.overflow = '';
+  };
+
   return (
     <div className="grid-section">
       <h2>Mars Surface Grid (Dynamic View)</h2>
       <p className="grid-info">Drag to pan and explore the grid, Rover is in the green cell.</p>
-      <div className="grid-container">
+      <div
+        className="grid-container"
+        ref={gridContainerRef}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={e => { handleMouseUp(); }}
+        onMouseMove={handleMouseMove}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
+        onTouchMove={handleTouchMove}
+        // onMouseEnter/onMouseLeave handled by event listeners
+      >
         <div
           className="grid"
           style={{ cursor: dragging.current ? 'grabbing' : 'grab', gridTemplateColumns: `repeat(${gridViewSize}, 1fr)` }}
-          onMouseDown={handleMouseDown}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          onMouseMove={handleMouseMove}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-          onTouchCancel={handleTouchEnd}
-          onTouchMove={handleTouchMove}
         >
           {Array.from({ length: gridViewSize }, (_, rowIndex) => (
             <div key={rowIndex} className="grid-row">
