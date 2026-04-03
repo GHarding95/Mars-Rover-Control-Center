@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
-import './App.css'
+import { useState, useEffect } from 'react';
+import { Analytics } from "@vercel/analytics/next";
+import './App.css';
 import RoverStatus from './components/RoverStatus';
 import CommandPanel from './components/CommandPanel';
 import MarsGrid from './components/MarsGrid';
@@ -340,6 +341,7 @@ function App() {
         </div>
         <MissionLog history={history} />
       </main>
+      <Analytics />
     </div>
   )
 }
