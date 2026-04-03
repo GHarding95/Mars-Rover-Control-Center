@@ -103,22 +103,28 @@ function App() {
     }
   }
 
+  /** Distance in meters from `50m` / `50M` or a bare integer `50` (same as `50m`). */
+  function parseMovementDistance(trimmed: string): number | null {
+    if (/^\d+m$/i.test(trimmed)) return parseInt(trimmed.slice(0, -1), 10)
+    if (/^\d+$/.test(trimmed)) return parseInt(trimmed, 10)
+    return null
+  }
+
   // Validate command format
   function validateCommand(command: string): boolean {
     const trimmed = command.trim()
     if (!trimmed) return true // Empty commands are valid (ignored)
-    
-    // Check for movement command (number + 'm')
-    if (/^\d+m$/i.test(trimmed)) return true
-    
+
+    if (parseMovementDistance(trimmed) !== null) return true
+
     if (parseCardinalDirection(trimmed) !== null) return true
-    
+
     return false
   }
 
   // Get proper command format message
   function getCommandFormatMessage(): string {
-    return "Valid commands: '50m' (move 50 meters), 'North', 'South', 'East', or 'West' (face that direction)"
+    return "Valid commands: '50m' or '50' (move 50 meters), 'North', 'South', 'East', or 'West' (face that direction)"
   }
 
   // Calculate new position based on current position, direction, and distance
@@ -164,34 +170,35 @@ function App() {
     const facing = parseCardinalDirection(trimmed)
     if (facing !== null) {
       newRover.direction = facing
-    } else if (/^\d+m$/i.test(trimmed)) {
-      // Movement command
-      const distance = parseInt(trimmed.slice(0, -1))
-      const oldPosition = newRover.position
-      const newPosition = calculateNewPosition(newRover.position, newRover.direction, distance)
-      // If move is blocked (would go out of bounds)
-      if (newPosition === oldPosition && isPerimeterSquare(oldPosition)) {
-        blocked = true
-      } else {
-        newRover.position = newPosition
-        newRover.isAtPerimeter = isPerimeterSquare(newPosition)
-        // Calculate actual distance moved
-        const oldRow = Math.floor((oldPosition - 1) / 100) + 1
-        const oldCol = ((oldPosition - 1) % 100) + 1
-        const newRow = Math.floor((newPosition - 1) / 100) + 1
-        const newCol = ((newPosition - 1) % 100) + 1
-        switch (newRover.direction) {
-          case 'North':
-          case 'South':
-            actualDistance = Math.abs(newRow - oldRow)
-            break
-          case 'East':
-          case 'West':
-            actualDistance = Math.abs(newCol - oldCol)
-            break
-        }
-        if (actualDistance < distance) {
-          cutShort = true
+    } else {
+      const distance = parseMovementDistance(trimmed)
+      if (distance !== null) {
+        const oldPosition = newRover.position
+        const newPosition = calculateNewPosition(newRover.position, newRover.direction, distance)
+        // If move is blocked (would go out of bounds)
+        if (newPosition === oldPosition && isPerimeterSquare(oldPosition)) {
+          blocked = true
+        } else {
+          newRover.position = newPosition
+          newRover.isAtPerimeter = isPerimeterSquare(newPosition)
+          // Calculate actual distance moved
+          const oldRow = Math.floor((oldPosition - 1) / 100) + 1
+          const oldCol = ((oldPosition - 1) % 100) + 1
+          const newRow = Math.floor((newPosition - 1) / 100) + 1
+          const newCol = ((newPosition - 1) % 100) + 1
+          switch (newRover.direction) {
+            case 'North':
+            case 'South':
+              actualDistance = Math.abs(newRow - oldRow)
+              break
+            case 'East':
+            case 'West':
+              actualDistance = Math.abs(newCol - oldCol)
+              break
+          }
+          if (actualDistance < distance) {
+            cutShort = true
+          }
         }
       }
     }
@@ -213,13 +220,15 @@ function App() {
     let currentRover = { ...rover, isAtPerimeter: isPerimeterSquare(rover.position) }
     const commandHistory: string[] = []
     let perimeterReachedThisBatch = false
+    const moveBlockedMessage = (i: number, cmd: string) =>
+      `Command ${i + 1}: ${cmd} — Move blocked: Rover has been stopped at the perimeter, this move would have gone out of bounds.`
     // Execute each command
     for (let i = 0; i < commands.length; i++) {
       if (commands[i].trim()) {
         const prevAtPerimeter = currentRover.isAtPerimeter
         const { newRover, blocked, cutShort, actualDistance } = executeCommand(commands[i], currentRover)
         if (blocked) {
-          errorMsg = `Command ${i + 1}: ${commands[i]} — Move blocked: Rover has been stopped at the perimeter, this move would have gone out of bounds.`
+          errorMsg = moveBlockedMessage(i, commands[i])
           commandHistory.push(errorMsg)
           // Do not update rover state for this command
           continue
@@ -236,6 +245,7 @@ function App() {
           : `Position ${currentRover.position} ${currentRover.direction}`
         if (cutShort) {
           status += ` (Move cut short by perimeter, moved ${actualDistance}m)`
+          errorMsg = moveBlockedMessage(i, commands[i])
         }
         commandHistory.push(`Command ${i + 1}: ${commands[i]} → ${status}`)
         if (perimeterReachedThisBatch) {
