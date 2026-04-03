@@ -79,7 +79,14 @@ body {
   margin-bottom: 2rem;
 }
 
-.rover-status, .command-section {
+.dashboard-left-column {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.rover-status, .command-section, .direction-compass {
   min-width: 0;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -89,12 +96,75 @@ body {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-.rover-status h2, .command-section h2 {
+.rover-status h2, .command-section h2, .direction-compass h2 {
   color: #ff6b35;
   margin-bottom: 1rem;
-  font-size: 1.5rem;
+  font-size: clamp(1.15rem, 2.8vw, 1.5rem);
   border-bottom: 2px solid #ff6b35;
   padding-bottom: 0.5rem;
+}
+
+.direction-compass__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.direction-compass__svg {
+  width: 100%;
+  max-width: min(260px, 100%);
+  height: auto;
+  aspect-ratio: 1;
+  display: block;
+}
+
+.direction-compass__letter {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: clamp(14px, 3.8vw, 18px);
+  font-weight: 700;
+  fill: #8a9bb0;
+  transition: fill 0.25s ease, filter 0.25s ease;
+}
+
+.direction-compass__letter--active {
+  fill: #ff6b35;
+  filter: drop-shadow(0 0 6px rgba(255, 107, 53, 0.65));
+}
+
+.direction-compass__caption {
+  margin: 0;
+  text-align: center;
+  color: #b8c5d6;
+  font-size: clamp(0.85rem, 2vw, 1rem);
+  font-weight: 600;
+}
+
+.direction-compass__hint {
+  margin: 0;
+  text-align: center;
+  color: #7a8a9e;
+  font-size: 1rem;
+  font-style: italic;
+  line-height: 1.35;
+  max-width: 18rem;
+}
+
+.direction-compass--interactive .direction-compass__dir--clickable {
+  cursor: pointer;
+}
+
+.direction-compass__dir--clickable:focus {
+  outline: none;
+}
+
+.direction-compass__dir--clickable:focus-visible .direction-compass__hit {
+  stroke: rgba(255, 107, 53, 0.9);
+  stroke-width: 2;
+}
+
+.direction-compass__dir--clickable:hover .direction-compass__letter:not(.direction-compass__letter--active) {
+  fill: #c8d4e4;
 }
 
 .status-display {
@@ -144,6 +214,7 @@ body {
 .command-help {
   color: #b8c5d6;
   margin-bottom: 1rem;
+  font-size: 1rem;
   font-style: italic;
 }
 
@@ -481,7 +552,7 @@ body {
       'grid-section'
       'command-section';
   }
-  .rover-status {
+  .dashboard-left-column {
     grid-area: rover-status;
   }
   .grid-section {
@@ -490,7 +561,7 @@ body {
   .command-section {
     grid-area: command-section;
   }
-  .rover-status, .command-section, .grid-section {
+  .dashboard-left-column, .command-section, .grid-section {
     margin-bottom: 1.5rem;
   }
 }
@@ -505,7 +576,7 @@ body {
       'grid-section'
       'command-section';
   }
-  .rover-status {
+  .dashboard-left-column {
     grid-area: rover-status;
   }
   .grid-section {
@@ -514,14 +585,14 @@ body {
   .command-section {
     grid-area: command-section;
   }
-  .rover-status, .command-section, .grid-section {
+  .dashboard-left-column, .command-section, .grid-section {
     margin-bottom: 1.5rem;
   }
 }
 
 @media (max-width: 900px) {
   /* Remove dashboard-row layout styles here to avoid overriding grid-area order */
-  .rover-status, .command-section, .grid-section {
+  .dashboard-left-column, .command-section, .grid-section {
     margin-bottom: 1.5rem;
   }
   .grid-container, .grid {
@@ -551,7 +622,7 @@ body {
     padding-right: 8px;
     box-sizing: border-box;
   }
-  .rover-status, .command-section, .grid-section {
+  .rover-status, .command-section, .grid-section, .direction-compass {
     padding: 1rem;
   }
   .grid-container, .grid {

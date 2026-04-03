@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { Analytics } from "@vercel/analytics/react";
 import './App.css';
 import RoverStatus from './components/RoverStatus';
+import DirectionCompass from './components/DirectionCompass';
 import MissionCommands from './components/MissionCommands';
 import MarsGrid from './components/MarsGrid';
 import MissionLog from './components/MissionLog';
 
 // Types for the Mars Rover app
-type Direction = 'North' | 'South' | 'East' | 'West'
+export type Direction = 'North' | 'South' | 'East' | 'West'
 
 interface RoverState {
   position: number
@@ -281,6 +282,34 @@ function App() {
     setCommands(newCommands)
   }
 
+  /** Apply a facing change immediately (same effect as executing that cardinal in Mission Commands). */
+  function executeCompassDirection(dir: Direction) {
+    setError('')
+    const currentRover = { ...rover, isAtPerimeter: isPerimeterSquare(rover.position) }
+    const { newRover, blocked, cutShort, actualDistance } = executeCommand(dir, currentRover)
+    if (blocked) {
+      return
+    }
+    let status = newRover.isAtPerimeter
+      ? `Position ${newRover.position} ${newRover.direction} - ROVER HAS REACHED THE PERIMETER!`
+      : `Position ${newRover.position} ${newRover.direction}`
+    if (cutShort) {
+      status += ` (Move cut short by perimeter, moved ${actualDistance}m)`
+    }
+    setRover(newRover)
+    setGrid((prevGrid: GridCell[]) =>
+      prevGrid.map((cell: GridCell) => ({
+        ...cell,
+        isRoverHere: cell.id === newRover.position,
+      }))
+    )
+    setGridViewCenter({
+      row: Math.floor((newRover.position - 1) / 100) + 1,
+      col: ((newRover.position - 1) % 100) + 1,
+    })
+    setHistory((prev: string[]) => [`Compass: ${dir} → ${status}`, ...prev])
+  }
+
   // Reset rover to starting position
   function resetRover() {
     setRover({
@@ -322,12 +351,15 @@ function App() {
 
       <main className="app-main">
         <div className="dashboard-row">
-          <RoverStatus
-            position={rover.position}
-            direction={rover.direction}
-            isAtPerimeter={rover.isAtPerimeter}
-            gridPos={roverGridPos}
-          />
+          <div className="dashboard-left-column">
+            <RoverStatus
+              position={rover.position}
+              direction={rover.direction}
+              isAtPerimeter={rover.isAtPerimeter}
+              gridPos={roverGridPos}
+            />
+            <DirectionCompass direction={rover.direction} onDirectionExecute={executeCompassDirection} />
+          </div>
           <MarsGrid
             grid={grid}
             roverPosition={rover.position}
