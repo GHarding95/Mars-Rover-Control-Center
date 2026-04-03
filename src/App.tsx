@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Analytics } from "@vercel/analytics/next";
+import { Analytics } from "@vercel/analytics/react";
 import './App.css';
 import RoverStatus from './components/RoverStatus';
 import CommandPanel from './components/CommandPanel';
