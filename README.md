@@ -12,12 +12,12 @@ https://mars-rover-control-center.vercel.app/
 3. Open your browser to the provided URL
 
 ### Controlling the Rover
-- **Movement**: `[number]m` (e.g., `50m`, `23m`)
-- **Direction**: `North`, `South`, `East`, or `West` — sets the rover’s facing to that direction (case-insensitive; matches Rover Status labels)
-- **Up to 5 commands at once**: Each command gets its own input field, enter several and execute them in sequence.
+- **Movement**: `[number]m` (e.g., `50m`, `23m`) - moves the rover a specified number of squares, typos such as '50' with no 'm' are auto-corrected.
+- **Direction**: `North`, `South`, `East`, or `West` — sets the rover’s facing to that direction, case-insensitive & matches Rover Status labels.
+- **Up to 5 commands at once**: Each command gets its own input field, enter one per line and execute them in sequence, typos are highlighted in the error pop up. In a sequence with an error, any commands after the error are not executed, so the system stops running when we encounter an error.
 
 ### Grid System
-- **100x100 squares**: Each square is 1 meter. Positions are numbered 1–10,000 (row-major: Square 1 is row 1, column 1; each row has 100 columns).
+- **100x100 squares**: Each square is 1 meter. Positions are numbered 1–10,000 (Square 1 is row 1, column 1; each row has 100 columns).
 - **Perimeter detection**: The rover can't leave the grid, commands that would take the Rover out of bounds are cut short at the perimeter and blocked from going further.
 - **Draggable grid**: Drag to explore the grid around your rover.
 - **Return to Rover**: Click to return to the Rover after dragging the map around.
