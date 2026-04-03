@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Analytics } from "@vercel/analytics/react";
 import './App.css';
 import RoverStatus from './components/RoverStatus';
-import CommandPanel from './components/CommandPanel';
+import MissionCommands from './components/MissionCommands';
 import MarsGrid from './components/MarsGrid';
 import MissionLog from './components/MissionLog';
 
@@ -93,6 +93,16 @@ function App() {
     return row === 1 || row === 100 || col === 1 || col === 100
   }
 
+  function parseCardinalDirection(trimmed: string): Direction | null {
+    switch (trimmed.toLowerCase()) {
+      case 'north': return 'North'
+      case 'south': return 'South'
+      case 'east': return 'East'
+      case 'west': return 'West'
+      default: return null
+    }
+  }
+
   // Validate command format
   function validateCommand(command: string): boolean {
     const trimmed = command.trim()
@@ -101,15 +111,14 @@ function App() {
     // Check for movement command (number + 'm')
     if (/^\d+m$/i.test(trimmed)) return true
     
-    // Check for direction command
-    if (trimmed.toLowerCase() === 'left' || trimmed.toLowerCase() === 'right') return true
+    if (parseCardinalDirection(trimmed) !== null) return true
     
     return false
   }
 
   // Get proper command format message
   function getCommandFormatMessage(): string {
-    return "Valid commands: '50m' (move 50 meters), 'left' (turn left), 'right' (turn right)"
+    return "Valid commands: '50m' (move 50 meters), 'North', 'South', 'East', or 'West' (face that direction)"
   }
 
   // Calculate new position based on current position, direction, and distance
@@ -152,23 +161,9 @@ function App() {
     let actualDistance = 0
     const trimmed = command.trim()
     if (!trimmed) return { newRover, blocked, cutShort, actualDistance }
-    const lowerCommand = trimmed.toLowerCase()
-    if (lowerCommand === 'left') {
-      // Turn left: South -> East -> North -> West -> South
-      switch (newRover.direction) {
-        case 'South': newRover.direction = 'East'; break
-        case 'East': newRover.direction = 'North'; break
-        case 'North': newRover.direction = 'West'; break
-        case 'West': newRover.direction = 'South'; break
-      }
-    } else if (lowerCommand === 'right') {
-      // Turn right: South -> West -> North -> East -> South
-      switch (newRover.direction) {
-        case 'South': newRover.direction = 'West'; break
-        case 'West': newRover.direction = 'North'; break
-        case 'North': newRover.direction = 'East'; break
-        case 'East': newRover.direction = 'South'; break
-      }
+    const facing = parseCardinalDirection(trimmed)
+    if (facing !== null) {
+      newRover.direction = facing
     } else if (/^\d+m$/i.test(trimmed)) {
       // Movement command
       const distance = parseInt(trimmed.slice(0, -1))
@@ -224,7 +219,7 @@ function App() {
         const prevAtPerimeter = currentRover.isAtPerimeter
         const { newRover, blocked, cutShort, actualDistance } = executeCommand(commands[i], currentRover)
         if (blocked) {
-          errorMsg = `Command ${i + 1}: ${commands[i]} → Move blocked: would exit grid at perimeter.`
+          errorMsg = `Command ${i + 1}: ${commands[i]} — Move blocked: Rover has been stopped at the perimeter, this move would have gone out of bounds.`
           commandHistory.push(errorMsg)
           // Do not update rover state for this command
           continue
@@ -331,7 +326,7 @@ function App() {
             onReturnToRover={() => setGridViewCenter(roverGridPos)}
             gridViewSize={gridViewSize}
           />
-          <CommandPanel
+          <MissionCommands
             commands={commands}
             error={error}
             onCommandChange={handleCommandChange}

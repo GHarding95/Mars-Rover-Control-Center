@@ -1,4 +1,4 @@
-interface CommandPanelProps {
+interface MissionCommandsProps {
   commands: string[];
   error: string;
   onCommandChange: (index: number, value: string) => void;
@@ -6,7 +6,7 @@ interface CommandPanelProps {
   onReset: () => void;
 }
 
-const CommandPanel: React.FC<CommandPanelProps> = ({
+const MissionCommands: React.FC<MissionCommandsProps> = ({
   commands,
   error,
   onCommandChange,
@@ -24,7 +24,7 @@ const CommandPanel: React.FC<CommandPanelProps> = ({
   return (
     <div className="command-section">
       <h2>Mission Commands</h2>
-      <p className="command-help">Enter up to 5 commands (e.g., "50m", "left", "23m, left, 4m")</p>
+      <p className="command-help">Enter up to 5 commands (e.g., "50m", "East", "25m, South, 4m")</p>
       <div className="command-inputs">
         {commands.map((command, index) => (
           <input
@@ -61,4 +61,4 @@ const CommandPanel: React.FC<CommandPanelProps> = ({
   );
 };
 
-export default CommandPanel; 
+export default MissionCommands;
