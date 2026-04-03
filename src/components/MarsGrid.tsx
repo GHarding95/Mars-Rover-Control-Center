@@ -1,5 +1,4 @@
 import { useRef, useState, useEffect } from 'react';
-import GridLegend from './GridLegend';
 
 interface GridCell {
   id: number;
@@ -184,7 +183,16 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
           ))}
         </div>
       </div>
-      <GridLegend />
+      <div className="grid-legend">
+        <div className="legend-item">
+          <div className="legend-color rover-here"></div>
+          <span>Rover Position</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-color perimeter"></div>
+          <span>Perimeter</span>
+        </div>
+      </div>
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
         <button
           className="return-to-rover-btn"
