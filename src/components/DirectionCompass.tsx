@@ -1,5 +1,5 @@
 import type { KeyboardEvent } from 'react';
-import type { Direction } from '../App';
+import type { Direction } from '../missionTypes';
 
 interface DirectionCompassProps {
   direction: Direction;

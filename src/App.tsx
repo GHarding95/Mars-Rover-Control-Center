@@ -1,33 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { Analytics } from "@vercel/analytics/react";
 import './App.css';
-import marsLogo from './assets/Mars.png';
-import RoverStatus from './components/RoverStatus';
-import DirectionCompass from './components/DirectionCompass';
-import MissionCommands from './components/MissionCommands';
-import MarsGrid from './components/MarsGrid';
-import MissionLog from './components/MissionLog';
+import type { Direction, GridCell, MissionLogEntry, RoverState } from './missionTypes'
 
-// Types for the Mars Rover app
-export type Direction = 'North' | 'South' | 'East' | 'West'
+export type { Direction, MissionLogEntry } from './missionTypes'
 
-interface RoverState {
-  position: number
-  direction: Direction
-  isAtPerimeter: boolean
-}
-
-interface GridCell {
-  id: number
-  isRoverHere: boolean
-  isPerimeter: boolean
-}
-
-export interface MissionLogEntry {
-  message: string
-  /** Wall time when the entry was recorded; `null` only for legacy rows without a stored time. */
-  at: number | null
-}
+const LandingPage = lazy(() => import('./components/Landing Page/LandingPage'))
+const MissionControl = lazy(() => import('./MissionControl'))
 
 const MISSION_START_LOG_RE = /^#1: Mission start/
 
@@ -112,6 +91,9 @@ function useResponsiveGridSize() {
 }
 
 function App() {
+  /** Full reload shows the intro; in-session state — reset rover does not remount App. */
+  const [showLanding, setShowLanding] = useState(true)
+
   const [rover, setRover] = useState<RoverState>(() => {
     const saved = localStorage.getItem('rover')
     return saved
@@ -154,19 +136,6 @@ function App() {
   useEffect(() => {
     const id = window.setInterval(() => setNowMs(Date.now()), 1000)
     return () => window.clearInterval(id)
-  }, [])
-
-  // Initialize the 100x100 grid (10,000 squares)
-  useEffect(() => {
-    const newGrid: GridCell[] = []
-    for (let i = 1; i <= 10000; i++) {
-      newGrid.push({
-        id: i,
-        isRoverHere: i === 1,
-        isPerimeter: isPerimeterSquare(i)
-      })
-    }
-    setGrid(newGrid)
   }, [])
 
   // Add useEffect to update grid when rover position changes
@@ -537,85 +506,67 @@ function App() {
   const elapsedHours = Math.floor((elapsedSec % 86400) / 3600)
   const elapsedMins = Math.floor((elapsedSec % 3600) / 60)
   const elapsedSecs = elapsedSec % 60
+  const missionClockLondon = formatMissionClockLondon(new Date(nowMs))
+
+  function enterMission() {
+    const pos = rover.position
+    const newGrid: GridCell[] = []
+    for (let i = 1; i <= 10000; i++) {
+      newGrid.push({
+        id: i,
+        isRoverHere: i === pos,
+        isPerimeter: isPerimeterSquare(i),
+      })
+    }
+    setGrid(newGrid)
+    setShowLanding(false)
+  }
+
+  if (showLanding) {
+    return (
+      <>
+        <Suspense
+          fallback={<div className="landing-suspense-fallback" role="presentation" aria-hidden />}
+        >
+          <LandingPage onEnter={enterMission} />
+        </Suspense>
+        <Analytics />
+      </>
+    )
+  }
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <div className="app-logo">
-          <h1>
-            <img src={marsLogo} alt="" className="app-logo-mars" aria-hidden />
-            Mars Rover Control
-          </h1>
-          <p>Mission Control Center</p>
-        </div>
-        <div className="app-header-timer" aria-live="polite" aria-atomic="true">
-          <p className="app-header-timer__title">Mars Rover Mission Elapsed Time</p>
-          <div
-            className="app-header-timer__elapsed"
-            role="timer"
-            aria-label={`Mission elapsed: ${elapsedDays} days, ${elapsedHours} hours, ${elapsedMins} minutes, ${elapsedSecs} seconds`}
-          >
-            <div className="app-header-timer__elapsed-grid" aria-hidden="true">
-              <span className="app-header-timer__num">{pad2(elapsedDays)}</span>
-              <span className="app-header-timer__colon" aria-hidden="true">
-                <span className="app-header-timer__colon-dot" />
-                <span className="app-header-timer__colon-dot" />
-              </span>
-              <span className="app-header-timer__num">{pad2(elapsedHours)}</span>
-              <span className="app-header-timer__colon" aria-hidden="true">
-                <span className="app-header-timer__colon-dot" />
-                <span className="app-header-timer__colon-dot" />
-              </span>
-              <span className="app-header-timer__num">{pad2(elapsedMins)}</span>
-              <span className="app-header-timer__colon" aria-hidden="true">
-                <span className="app-header-timer__colon-dot" />
-                <span className="app-header-timer__colon-dot" />
-              </span>
-              <span className="app-header-timer__num">{pad2(elapsedSecs)}</span>
-              <span className="app-header-timer__label">Days</span>
-              <span className="app-header-timer__label-gap" />
-              <span className="app-header-timer__label">Hrs</span>
-              <span className="app-header-timer__label-gap" />
-              <span className="app-header-timer__label">Mins</span>
-              <span className="app-header-timer__label-gap" />
-              <span className="app-header-timer__label">Secs</span>
-            </div>
+    <>
+      <Suspense
+        fallback={
+          <div className="mission-control-fallback" role="status">
+            Loading mission control…
           </div>
-          <p className="app-header-timer__datetime">{formatMissionClockLondon(new Date(nowMs))}</p>
-        </div>
-      </header>
-
-      <main className="app-main">
-        <div className="dashboard-row">
-          <div className="dashboard-left-column">
-            <RoverStatus
-              position={rover.position}
-              direction={rover.direction}
-              isAtPerimeter={rover.isAtPerimeter}
-              gridPos={roverGridPos}
-            />
-            <DirectionCompass direction={rover.direction} onDirectionExecute={executeCompassDirection} />
-          </div>
-          <MarsGrid
-            grid={grid}
-            roverPosition={rover.position}
-            gridViewCenter={gridViewCenter}
-            setGridViewCenter={setGridViewCenter}
-            onReturnToRover={() => setGridViewCenter(roverGridPos)}
-            gridViewSize={gridViewSize}
-          />
-          <MissionCommands
-            commands={commands}
-            error={error}
-            onCommandChange={handleCommandChange}
-            onExecute={executeCommands}
-            onReset={resetRover}
-          />
-        </div>
-        <MissionLog history={history} />
-      </main>
+        }
+      >
+        <MissionControl
+          rover={rover}
+          grid={grid}
+          roverGridPos={roverGridPos}
+          gridViewCenter={gridViewCenter}
+          setGridViewCenter={setGridViewCenter}
+          gridViewSize={gridViewSize}
+          commands={commands}
+          error={error}
+          history={history}
+          elapsedDays={elapsedDays}
+          elapsedHours={elapsedHours}
+          elapsedMins={elapsedMins}
+          elapsedSecs={elapsedSecs}
+          missionClockLondon={missionClockLondon}
+          executeCompassDirection={executeCompassDirection}
+          handleCommandChange={handleCommandChange}
+          executeCommands={executeCommands}
+          resetRover={resetRover}
+        />
+      </Suspense>
       <Analytics />
-    </div>
+    </>
   )
 }
 

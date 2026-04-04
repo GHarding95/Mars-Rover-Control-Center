@@ -989,3 +989,21 @@ body {
   gap: 0.75em;
   width: 100%;
 }
+
+/* Lazy-route fallbacks (styles live here so they apply before chunk CSS loads) */
+.landing-suspense-fallback {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #050810;
+}
+
+.mission-control-fallback {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--app-bg);
+  color: var(--nasa-muted);
+  font-family: var(--font-sans);
+}

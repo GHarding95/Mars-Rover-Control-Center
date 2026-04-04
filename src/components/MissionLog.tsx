@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { MissionLogEntry } from '../App';
+import type { MissionLogEntry } from '../missionTypes';
 
 interface MissionLogProps {
   history: MissionLogEntry[];

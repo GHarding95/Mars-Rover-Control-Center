@@ -1,0 +1,321 @@
+/* Full-screen intro — NASA palette matches App.css */
+
+.landing-page {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  overflow: hidden;
+  background: #050810;
+}
+
+/*
+ * Welcome layer: solid black curtain (never transparent) so WebGL is not visible during load.
+ * Only the "Welcome" text fades in — see LandingPage.tsx + .landing-canvas--concealed.
+ */
+.landing-boot {
+  position: absolute;
+  inset: 0;
+  z-index: 10002;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: auto;
+  cursor: default;
+  background: #000;
+  opacity: 1;
+}
+
+.landing-boot__welcome {
+  margin: 0;
+  font-size: clamp(2rem, 6.5vw, 3.5rem);
+  font-weight: 500;
+  letter-spacing: 0.48em;
+  padding-left: 0.48em;
+  text-transform: uppercase;
+  color: rgba(248, 250, 255, 0.96);
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06),
+    0 24px 56px rgba(0, 0, 0, 0.45),
+    0 0 72px rgba(255, 255, 255, 0.04);
+  opacity: 0;
+  animation: landing-boot-text-reveal 1.35s cubic-bezier(0.42, 0, 0.58, 1) forwards;
+}
+
+@keyframes landing-boot-text-reveal {
+  0% {
+    opacity: 0;
+  }
+  14% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Dismiss: interpolates from current opacity (intro may still be running). */
+@keyframes landing-boot-fadeout {
+  to {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+.landing-boot--exit {
+  animation: landing-boot-fadeout 0.7s cubic-bezier(0.33, 0, 0.2, 1) forwards !important;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-boot {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .landing-boot__welcome {
+    animation: none;
+    opacity: 0;
+  }
+
+  .landing-boot--exit {
+    animation: landing-boot-fadeout 0.01s linear forwards !important;
+  }
+}
+
+.landing-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  transition:
+    opacity 0.45s cubic-bezier(0.33, 0, 0.2, 1),
+    visibility 0.45s cubic-bezier(0.33, 0, 0.2, 1);
+}
+
+/* Hide canvas until scene + assets are ready (WebGL may still render off-screen). */
+.landing-canvas--concealed {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.landing-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  pointer-events: none;
+}
+
+.landing-overlay > * {
+  pointer-events: auto;
+}
+
+.landing-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(11, 61, 145, 0.03) 2px,
+    rgba(11, 61, 145, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.landing-vignette {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 120px 40px rgba(0, 0, 0, 0.65);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.landing-header {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 42rem;
+}
+
+.landing-badge {
+  display: inline-block;
+  margin: 0 0 1rem;
+  padding: 0.35rem 0.9rem;
+  font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--nasa-muted, #9ca8bc);
+  border: 1px solid rgba(11, 61, 145, 0.45);
+  border-radius: 999px;
+  background: rgba(5, 8, 16, 0.55);
+  backdrop-filter: blur(8px);
+}
+
+.landing-title {
+  margin: 0;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.landing-title__line {
+  display: block;
+  font-size: clamp(2.1rem, 8vw, 4rem);
+  color: var(--nasa-white, #fff);
+  text-shadow:
+    0 0 40px rgba(40, 139, 255, 0.35),
+    0 4px 24px rgba(0, 0, 0, 0.8);
+  animation: landing-title-float 5s ease-in-out infinite;
+}
+
+.landing-title__accent {
+  display: block;
+  font-size: clamp(2.4rem, 9vw, 4.6rem);
+  background: linear-gradient(
+    135deg,
+    var(--nasa-red-light, #ff6a56) 0%,
+    var(--nasa-red, #fc3d21) 40%,
+    #ff9a40 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 28px rgba(252, 61, 33, 0.45));
+  animation: landing-title-float 5s ease-in-out infinite 0.15s;
+}
+
+@keyframes landing-title-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-title__line,
+  .landing-title__accent {
+    animation: none;
+  }
+}
+
+.landing-tagline {
+  margin: 1.25rem 0 0;
+  font-size: clamp(0.9rem, 2.1vw, 1.05rem);
+  color: var(--nasa-muted, #9ca8bc);
+  line-height: 1.55;
+  text-wrap: balance;
+}
+
+.landing-cta {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 8rem;
+}
+
+.landing-enter-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 1.15rem 2.5rem 1.25rem;
+  min-width: min(90vw, 22rem);
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  border-radius: 4px;
+  background: linear-gradient(
+    180deg,
+    var(--nasa-blue-light, #0e4cb3) 0%,
+    var(--nasa-blue, #0b3d91) 45%,
+    var(--nasa-blue-dark, #061f4d) 100%
+  );
+  color: var(--nasa-white, #fff);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 8px 32px rgba(11, 61, 145, 0.55),
+    0 20px 48px rgba(0, 0, 0, 0.5);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+.landing-enter-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 0 0 1px rgba(14, 76, 179, 0.45),
+    0 12px 40px rgba(11, 61, 145, 0.65),
+    0 24px 56px rgba(11, 61, 145, 0.28);
+  filter: brightness(1.06);
+}
+
+.landing-enter-btn:focus-visible {
+  outline-offset: 0;
+  outline: 4px solid AccentColor;
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+.landing-enter-btn:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.landing-enter-btn__label {
+  position: relative;
+  font-size: clamp(1rem, 2.5vw, 1.15rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.landing-enter-btn__sub {
+  position: relative;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  opacity: 0.75;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.landing-footer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem 0.75rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(156, 168, 188, 0.65);
+}
+
+.landing-footer__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--nasa-red, #fc3d21);
+  opacity: 0.6;
+}
