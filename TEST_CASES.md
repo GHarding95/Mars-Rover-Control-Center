@@ -1,244 +1,239 @@
-# 🧪 Mars Rover Application Test Cases
+# Mars Rover — test cases
 
-This document outlines comprehensive test cases to verify the Mars Rover application functionality.
+Manual checks for the Mars Rover Control Center. Align expected copy with **Mission Log** (newest entries appear **at the top** of the list).
 
-**Position numbering**: Square numbers follow the app formula: `position = (row - 1) × 100 + col`, with rows and columns from 1–100. South increases row; East increases column.
-
-## 🎯 Core Functionality Tests
-
-### 1. Initial State Verification
-- [ ] Rover starts at Square 1
-- [ ] Rover faces South direction
-- [ ] Grid shows rover at position (1,1)
-- [ ] No perimeter warning is displayed
-- [ ] Mission log shows "No commands executed yet"
-
-### 2. Basic Movement Tests
-
-#### Test Case 1: Simple Forward Movement
-**Commands**: `50m`
-**Expected Result**: 
-- Rover moves to Square 5001 (row 51, column 1)
-- Direction remains South
-- Mission log includes `50m` and shows position **5001** and **South**
-
-#### Test Case 2: Multiple Movement Commands
-**Commands**: `10m`, `20m`, `15m`
-**Expected Result**:
-- Rover ends at Square 4501 (row 46, column 1)
-- Direction remains South
-- Mission log shows 3 separate entries
-
-### 3. Direction Change Tests
-
-#### Test Case 3: Face East
-**Commands**: `East`
-**Expected Result**:
-- Position remains the same
-- Direction changes from South to East
-- Mission log: `Command 1: East → Position [current] East` (or lowercase `east` if you typed that)
-
-#### Test Case 4: Face West
-**Commands**: `West`
-**Expected Result**:
-- Position remains the same
-- Direction changes from South to West
-- Mission log: `Command 1: West → Position [current] West`
-
-#### Test Case 5: Multiple Direction Commands
-**Commands**: `East`, `West`, `North`
-**Expected Result**:
-- Facing ends as **North** (each command sets heading: South → East → West → North)
-- Position unchanged
-- Mission log shows 3 direction updates
-
-### 4. Combined Movement and Direction Tests
-
-#### Test Case 6: Move and Change Heading
-**Commands**: `25m`, `East`, `30m`
-**Expected Result**:
-1. Move 25m South: Square 1 → Square 2501 (row 26, col 1)
-2. Face East
-3. Move 30m East: row 26, col 31 → Square **2531**
-- Final position: Square **2531**, facing East
-
-#### Test Case 7: Complex Sequence (From Problem Description)
-**Commands**: `50m`, `East`, `23m`, `North`, `4m`
-**Expected Result**:
-1. Move 50m South: Square 1 → Square 5001 (row 51, col 1)
-2. Face East
-3. Move 23m East: col 24 → Square **5024** (row 51, col 24)
-4. Face North
-5. Move 4m North: row 47, col 24 → Square **4624**
-- Final position: Square **4624**, facing North
-
-### 5. Boundary and Perimeter Tests
-
-#### Test Case 8: Move to Perimeter
-**Commands**: `99m` (from Square 1)
-**Expected Result**:
-- Rover moves to Square **9901** (row 100, col 1 — perimeter)
-- Perimeter warning displayed
-- Mission log: includes `Position 9901` and `ROVER HAS REACHED THE PERIMETER!`
-
-#### Test Case 9: Move Beyond Boundary
-**Commands**: `150m` (from Square 1)
-**Expected Result**:
-- Rover stops at Square **9901** (south edge; row clamped to 100)
-- Perimeter warning displayed
-- Move may be cut short vs requested distance
-
-#### Test Case 10: Perimeter from Different Starting Position
-**Starting**: Square 50 (row 1, col 50), facing East  
-**Commands**: `60m`
-**Expected Result**:
-- East column would exceed 100; column clamps to 100
-- Rover ends at Square **100** (row 1, col 100 — perimeter)
-- Perimeter warning displayed
-
-### 6. Command Validation Tests
-
-#### Test Case 11: Invalid Movement Command
-**Commands**: `50` (missing 'm')
-**Expected Result**:
-- Error message displayed
-- Commands not executed
-- Rover position unchanged
-
-#### Test Case 12: Invalid Direction Command
-**Commands**: `up`
-**Expected Result**:
-- Error message displayed
-- Commands not executed
-- Rover position unchanged
-
-#### Test Case 13: Invalid Format
-**Commands**: `abc`, `50km`, `leftt`
-**Expected Result**:
-- Error message with proper format instructions
-- Commands not executed
-
-### 7. Reset Functionality Tests
-
-#### Test Case 14: Reset After Movement
-**Steps**:
-1. Execute commands: `50m`, `East`
-2. Click "Reset Rover"
-**Expected Result**:
-- Rover returns to Square 1
-- Direction resets to South
-- Mission log cleared
-- Command inputs cleared
-- No perimeter warning
-
-### 8. Grid Visualization Tests
-
-#### Test Case 15: Grid Display
-**Verification**:
-- Grid shows a representative viewport (size varies by screen)
-- Square numbers match app numbering
-- Perimeter squares highlighted
-- Rover position clearly marked with direction arrow
-
-#### Test Case 16: Grid Updates
-**Steps**:
-1. Execute movement commands
-2. Observe grid updates
-**Expected Result**:
-- Grid cell highlighting moves with rover
-- Direction arrow updates correctly
-- Smooth visual transitions
-
-### 9. Responsive Design Tests
-
-#### Test Case 17: Desktop View
-**Verification**:
-- Full layout displays correctly
-- Grid size appropriate for desktop
-- All panels visible
-
-#### Test Case 18: Mobile View
-**Verification**:
-- Layout adapts to smaller screens
-- Grid cells resize appropriately
-- Buttons remain accessible
-- Text remains readable
-
-### 10. Edge Cases
-
-#### Test Case 19: Empty Commands
-**Commands**: Leave all command fields empty
-**Expected Result**:
-- No error message
-- No movement
-- Mission log unchanged
-
-#### Test Case 20: Mixed Valid/Invalid Commands
-**Commands**: `50m`, `invalid`, `East`
-**Expected Result**:
-- Error message displayed
-- No commands executed
-- Rover position unchanged
-
-#### Test Case 21: Maximum Commands
-**Commands**: Fill all 5 command fields with valid commands
-**Expected Result**:
-- All 5 commands execute
-- Mission log shows all 5 entries
-- Commands clear after execution
-
-## 🎮 Manual Testing Instructions
-
-### Setup
-1. Start the development server: `npm run dev`
-2. Open browser to the provided URL
-3. Verify initial state
-
-### Testing Process
-1. **Basic Tests**: Start with simple movement and direction commands
-2. **Complex Tests**: Test combined movements and heading changes
-3. **Boundary Tests**: Test perimeter detection and boundary handling
-4. **Validation Tests**: Test error handling with invalid commands
-5. **UI Tests**: Verify visual updates and responsive design
-6. **Reset Tests**: Test reset functionality after various states
-
-### Expected Behaviors Summary
-- ✅ Rover starts at Square 1, facing South
-- ✅ Movement commands: `[number]m` format
-- ✅ Direction commands: `North`, `South`, `East`, or `West` (set facing to match Rover Status)
-- ✅ Grid: 100×100 squares, positions 1–10,000
-- ✅ Perimeter detection and stopping
-- ✅ Command validation with error messages
-- ✅ Visual grid representation
-- ✅ Mission log with command history
-- ✅ Reset functionality
-- ✅ Responsive design
-
-## 🐛 Common Issues to Check
-
-1. **Grid Numbering**: Positions use `(row - 1) × 100 + col` with row/col 1–100
-2. **Direction Logic**: Cardinal commands set heading directly (not incremental turns)
-3. **Boundary Detection**: Check perimeter detection accuracy
-4. **Command Validation**: Test various invalid input formats
-5. **Visual Updates**: Ensure grid and status updates in real-time
-6. **Error Handling**: Verify proper error messages display
-7. **Reset Functionality**: Test reset from various states
-
-## 📊 Success Criteria
-
-All test cases should pass with the following criteria:
-- ✅ Correct movement calculations
-- ✅ Proper direction / heading updates
-- ✅ Accurate boundary detection
-- ✅ Valid error handling
-- ✅ Responsive UI updates
-- ✅ Complete mission logging
-- ✅ Visual grid representation
-- ✅ Reset functionality
-- ✅ Mobile responsiveness
+**Position math**: `position = (row − 1) × 100 + col`, with `row`, `col` ∈ 1…100. South increases row; North decreases row; East increases column; West decreases column.
 
 ---
 
-**Test Status**: 🟡 Ready for Execution  
-**Coverage**: Comprehensive functionality testing  
-**Priority**: High - All core features must work correctly
+## Command syntax (mission inputs)
+
+| Type | Accepted forms |
+|------|------------------|
+| Move | `50m`, `50M`, or bare **`50`** (treated as 50 meters) |
+| Face | `North`, `South`, `East`, `West` (case-insensitive matching) |
+| Empty slot | Ignored |
+
+Invalid commands in **any** filled slot cause **no** execution for the whole batch (validation runs before the run).
+
+---
+
+## Mission log numbering and order
+
+- Entries use **`#1`, `#2`, `#3`, …** = **total** commands logged this session (not “slot 1–5” in the batch).
+- After **Reset Rover**, numbering restarts: next substantive line after the seeded start is **`#2`**.
+- If **history** was restored from **localStorage** with existing lines, new entries continue **`#(previous count + 1)`**.
+- **Newest** log lines appear **first** in the Mission Log UI.
+
+---
+
+## Mission log line patterns (reference)
+
+Use these to spot-check UI text (exact `#` depends on session).
+
+| Event | Pattern |
+|--------|---------|
+| Mission start | `#1: Mission start — square {pos}, facing {dir}` — optional ` — at {North\|East\|South\|West} perimeter` or corner ` — at {Edge} and {Edge} perimeters` |
+| Move (full) | `#{n}: Moved {X}m to square {pos}, facing {dir}` — optional ` — at {edge} perimeter` |
+| Move (cut short by map edge) | `#{n}: Moved {actual}m to square {pos}, facing {dir} (command shortened from {requested}m to {actual}m) — at {edge} perimeter` |
+| Direction (mission commands) | `#{n}: Changed direction — square {pos}, facing {dir}` — optional perimeter suffix |
+| Blocked move (already on edge, ordered through edge) | `#{n}: {X}m blocked — square {pos}, facing {dir}` |
+| Compass | `#{n}: Compass, changed direction — square {pos}, facing {dir}` — optional perimeter suffix |
+
+**Error banner** (red area under mission commands), when a move is shortened by the perimeter:
+
+- `#{n}: Perimeter reached — command shortened from {requested}m to {actual}m`
+
+In the log, bare distances are normalized with **`m`** (e.g. input `5` → `5m` in text).
+
+---
+
+## Persistence (`localStorage`)
+
+- **`rover`**: position, direction, perimeter flag — restored on reload.
+- **`history`**: mission log strings — restored on reload; **#** sequence for new lines continues after saved count.
+
+For a “clean” first-run test, use private browsing or clear site data, or rely on **Reset Rover** (resets rover and replaces history with a fresh **#1 Mission start**).
+
+---
+
+## 1. Initial load and mission start
+
+- [ ] Rover Status: **Square 1**, **South**, grid **Row 1, Col 1** (or persisted state if saved).
+- [ ] With **empty** saved history: Mission Log ends up with **`#1: Mission start — square …, facing …`** (and perimeter suffix if start square is on an edge — default square 1 is **North and West perimeters**).
+- [ ] Mission Log is **not** stuck on “No commands executed yet” once the start line is seeded (after first effect).
+- [ ] **Direction Compass** shows heading consistent with Rover Status; **N/E/S/W** are clickable.
+
+---
+
+## 2. Movement
+
+### 2.1 Simple move
+
+**Commands**: `50m` (one field), Execute.
+
+- [ ] Rover at square **5001** (row 51, col 1), facing **South** (unchanged).
+- [ ] Log includes something like: `Moved 50m to square 5001, facing South` with **`#2`** if mission start was `#1` (numbers depend on session).
+
+### 2.2 Bare number = meters
+
+**Commands**: `50` (no `m`), Execute.
+
+- [ ] Same behavior as `50m`; log shows **`50m`** in the Moved line.
+
+### 2.3 Multiple moves in one batch
+
+**Commands**: `10m`, `20m`, `15m` in three fields, Execute.
+
+- [ ] Final square **4501** (row 46, col 1), **South**.
+- [ ] Three new log lines (numbers consecutive), newest first in the panel.
+
+---
+
+## 3. Direction changes (mission commands)
+
+### 3.1 Face East
+
+**Commands**: `East`, Execute.
+
+- [ ] Position unchanged; facing **East**.
+- [ ] Log: `Changed direction — square {pos}, facing East` (with `#n` and perimeter suffix if on an edge).
+
+### 3.2 Sequence East → West → North
+
+**Commands**: `East`, `West`, `North`.
+
+- [ ] Final facing **North** (each command sets absolute heading).
+- [ ] Three `Changed direction` lines in log.
+
+---
+
+## 4. Combined move + direction
+
+**Commands**: `25m`, `East`, `30m`, Execute.
+
+1. Move 25 South: 1 → **2501** (row 26, col 1).
+2. Face East.
+3. Move 30 East: → **2531** (row 26, col 31).
+
+- [ ] Final **square 2531**, **East**; log lines match patterns above.
+
+### Complex sequence (from README-style scenario)
+
+**Commands**: `50m`, `East`, `23m`, `North`, `4m`.
+
+- [ ] Final square **4624**, **North** (verify with Rover Status).
+
+---
+
+## 5. Perimeter and boundaries
+
+### 5.1 Move to south edge
+
+**Commands**: `99m` from square 1 (South).
+
+- [ ] Ends **9901** (row 100, col 1); Rover Status shows perimeter / grid on south edge.
+- [ ] Log: `Moved … to square 9901, facing South` with **` — at South perimeter`** (or combined corner wording if applicable).
+
+### 5.2 Overshoot (clamp)
+
+**Commands**: `150m` from square 1.
+
+- [ ] Stops at **9901**; move is **cut short** (actual distance 99).
+- [ ] Log shows **actual** meters in “Moved”, plus `(command shortened from 150m to 99m)` and **perimeter edge** suffix.
+- [ ] Error area may show: **`Perimeter reached — command shortened from 150m to 99m`**.
+
+### 5.3 Batch stops after first perimeter hit
+
+From an interior square, use a sequence that reaches the perimeter mid-batch.
+
+- [ ] Commands **after** the one that first reaches the perimeter **do not run** (perimeter stop rule).
+
+### 5.4 Blocked move (already on perimeter, drive outward)
+
+Position rover on an edge square facing **outward**, command a move (e.g. `10m`).
+
+- [ ] Rover does not leave the map; log line **`… blocked — square …, facing …`**.
+- [ ] Error text reflects blocked move (same line may appear in error region).
+
+---
+
+## 6. Compass
+
+- [ ] Click **N / E / S / W**: heading updates **immediately** (no need to press Execute).
+- [ ] Mission log adds: **`Compass, changed direction — square {pos}, facing {dir}`** (plus perimeter suffix when on edge).
+- [ ] Next **#** increments like any other action.
+- [ ] Compass needle and active letter match **Rover Status** facing.
+
+---
+
+## 7. Validation and errors
+
+### 7.1 Invalid token
+
+**Commands**: `up`, `abc`, `50km`, Execute.
+
+- [ ] Error lists invalid slot / format; **no** rover change.
+
+### 7.2 Mixed batch (invalid in one slot)
+
+**Commands**: `50m`, `invalid`, `East`, Execute.
+
+- [ ] **No** execution; rover unchanged.
+
+### 7.3 Empty batch
+
+All fields empty, Execute.
+
+- [ ] No error; rover unchanged; no new lines (except any prior state).
+
+---
+
+## 8. Reset Rover
+
+1. Move or change heading so state ≠ start.
+2. Click **Reset Rover**.
+
+- [ ] Rover: square **1**, **South**, grid 1,1.
+- [ ] Mission log replaced by **`#1: Mission start — square 1, facing South`** (plus north/west corner perimeter suffix for square 1).
+- [ ] `nextLogNumberRef` behavior: next logged action should be **`#2`**.
+- [ ] Command inputs cleared; error cleared.
+
+---
+
+## 9. Grid and layout
+
+- [ ] Viewport size follows breakpoints (e.g. 7 / 10 / 20 cells per side by width).
+- [ ] Rover cell and direction indicator update after moves / compass.
+- [ ] Perimeter cells visually distinct; **Return to rover** (or equivalent) recenters when panned away.
+- [ ] **Rover Status** and **Compass** sit in the left column; layout stacks on narrow screens.
+
+---
+
+## 10. Responsiveness and UX
+
+- [ ] Dashboard readable on small widths; mission log lines **wrap** (no clipped “square” text).
+- [ ] Execute / Reset remain usable touch targets.
+
+---
+
+## 11. Edge cases
+
+- [ ] **Maximum five** non-empty commands per Execute all run in order (until perimeter stop).
+- [ ] **localStorage**: reload preserves rover and history where expected.
+
+---
+
+## Success criteria summary
+
+- Correct movement and clamping on a 100×100 grid.
+- Absolute cardinal facing (not turn-by-turn).
+- Perimeter detection, cut-short moves, blocked moves, and batch stop at perimeter.
+- Mission log formats and **`#`** sequencing as documented.
+- Compass applies facing immediately with correct log line.
+- Validation blocks the whole batch on any invalid command.
+- Reset restores start state and mission start log line.
+
+---
+
+**Document status**: aligned with current app behavior (mission log wording, compass, bare distances, perimeter labels, `localStorage`, reset + `#1` mission start).

@@ -24,7 +24,7 @@ const MissionCommands: React.FC<MissionCommandsProps> = ({
   return (
     <div className="command-section">
       <h2>Mission Commands</h2>
-      <p className="command-help">Enter up to 5 commands (e.g., "50m" or "50", "East", "25, South, 4m")</p>
+      <p className="command-help">Enter up to 5 commands (e.g., "50m", "East", "25m", "South", "4m")</p>
       <div className="command-inputs">
         {commands.map((command, index) => (
           <input

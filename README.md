@@ -12,8 +12,8 @@ https://mars-rover-control-center.vercel.app/
 3. Open your browser to the provided URL
 
 ### Controlling the Rover
-- **Movement**: `[number]m` (e.g., `50m`, `23m`) - moves the rover a specified number of squares, typos such as '50' with no 'm' are auto-corrected.
-- **Direction**: `North`, `South`, `East`, or `West` — sets the rover’s facing to that direction, case-insensitive & matches Rover Status labels.
+- **Movement**: `[number]m` (e.g., `50m`, `23m`) - moves the rover a specified number of squares, typos such as '50' with no 'm' are auto-corrected and the command is executed.
+- **Direction**: `North`, `South`, `East`, or `West` — sets the rover facing to that direction, case-insensitive & matches Rover Status labels.
 - **Up to 5 commands at once**: Each command gets its own input field, enter one per line and execute them in sequence, typos are highlighted in the error pop up. In a sequence with an error, any commands after the error are not executed, so the system stops running when we encounter an error.
 
 ### Grid System

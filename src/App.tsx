@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Analytics } from "@vercel/analytics/react";
 import './App.css';
 import RoverStatus from './components/RoverStatus';
@@ -54,6 +54,19 @@ function App() {
   const [error, setError] = useState<string>('')
   const [grid, setGrid] = useState<GridCell[]>([])
 
+  /** Running mission-log index (#1, #2, …); continues after saved history; reset with rover. */
+  const nextLogNumberRef = useRef(
+    (() => {
+      try {
+        const saved = localStorage.getItem('history')
+        const h = saved ? JSON.parse(saved) : []
+        return Array.isArray(h) ? h.length + 1 : 1
+      } catch {
+        return 1
+      }
+    })()
+  )
+
   // Add useEffect to save rover to localStorage when it changes
   useEffect(() => {
     localStorage.setItem('rover', JSON.stringify(rover))
@@ -94,6 +107,26 @@ function App() {
     return row === 1 || row === 100 || col === 1 || col === 100
   }
 
+  /** Mission-log suffix for perimeter cells (which map edge(s): North, East, South, West). */
+  function perimeterEdgesSuffix(position: number): string {
+    const row = Math.floor((position - 1) / 100) + 1
+    const col = ((position - 1) % 100) + 1
+    const edges: string[] = []
+    if (row === 1) edges.push('North')
+    if (row === 100) edges.push('South')
+    if (col === 1) edges.push('West')
+    if (col === 100) edges.push('East')
+    if (edges.length === 0) return ' — at perimeter'
+    if (edges.length === 1) return ` — at ${edges[0]} perimeter`
+    return ` — at ${edges[0]} and ${edges[1]} perimeters`
+  }
+
+  function missionStartLogLine(r: RoverState): string {
+    let line = `#1: Mission start — square ${r.position}, facing ${r.direction}`
+    if (r.isAtPerimeter) line += perimeterEdgesSuffix(r.position)
+    return line
+  }
+
   function parseCardinalDirection(trimmed: string): Direction | null {
     switch (trimmed.toLowerCase()) {
       case 'north': return 'North'
@@ -109,6 +142,47 @@ function App() {
     if (/^\d+m$/i.test(trimmed)) return parseInt(trimmed.slice(0, -1), 10)
     if (/^\d+$/.test(trimmed)) return parseInt(trimmed, 10)
     return null
+  }
+
+  /** How a command appears in the mission log (bare distances shown with `m`, e.g. `5` → `5m`). */
+  function formatCommandForMissionLog(command: string): string {
+    const trimmed = command.trim()
+    if (!trimmed) return ''
+    const meters = parseMovementDistance(trimmed)
+    if (meters !== null) return `${meters}m`
+    return trimmed
+  }
+
+  function missionLogLineForResult(
+    seq: number,
+    rawTrimmed: string,
+    cmdLog: string,
+    roverAfter: RoverState,
+    cutShort: boolean,
+    actualDistance: number
+  ): string {
+    const sq = roverAfter.position
+    const face = roverAfter.direction
+    if (parseCardinalDirection(rawTrimmed) !== null) {
+      let line = `#${seq}: Changed direction — square ${sq}, facing ${face}`
+      if (roverAfter.isAtPerimeter) line += perimeterEdgesSuffix(sq)
+      return line
+    }
+    const requestedM = parseMovementDistance(rawTrimmed)
+    const movedLabel =
+      cutShort && requestedM !== null ? `${actualDistance}m` : cmdLog
+    let line = `#${seq}: Moved ${movedLabel} to square ${sq}, facing ${face}`
+    if (cutShort && requestedM !== null) {
+      line += ` (command shortened from ${requestedM}m to ${actualDistance}m)`
+      line += perimeterEdgesSuffix(sq)
+    } else if (roverAfter.isAtPerimeter) {
+      line += perimeterEdgesSuffix(sq)
+    }
+    return line
+  }
+
+  function missionLogLineBlocked(seq: number, cmdLog: string, roverAt: RoverState): string {
+    return `#${seq}: ${cmdLog} blocked — square ${roverAt.position}, facing ${roverAt.direction}`
   }
 
   // Validate command format
@@ -221,16 +295,18 @@ function App() {
     let currentRover = { ...rover, isAtPerimeter: isPerimeterSquare(rover.position) }
     const commandHistory: string[] = []
     let perimeterReachedThisBatch = false
-    const moveBlockedMessage = (i: number, cmd: string) =>
-      `Command ${i + 1}: ${cmd} — Move blocked: Rover has been stopped at the perimeter, this move would have gone out of bounds.`
     // Execute each command
     for (let i = 0; i < commands.length; i++) {
       if (commands[i].trim()) {
+        const rawTrimmed = commands[i].trim()
+        const cmdLog = formatCommandForMissionLog(commands[i])
+        const seq = nextLogNumberRef.current++
         const prevAtPerimeter = currentRover.isAtPerimeter
         const { newRover, blocked, cutShort, actualDistance } = executeCommand(commands[i], currentRover)
         if (blocked) {
-          errorMsg = moveBlockedMessage(i, commands[i])
-          commandHistory.push(errorMsg)
+          const line = missionLogLineBlocked(seq, cmdLog, currentRover)
+          errorMsg = line
+          commandHistory.push(line)
           // Do not update rover state for this command
           continue
         } else {
@@ -240,15 +316,16 @@ function App() {
         if (!prevAtPerimeter && currentRover.isAtPerimeter) {
           perimeterReachedThisBatch = true
         }
-        // Add to history
-        let status = currentRover.isAtPerimeter 
-          ? `Position ${currentRover.position} ${currentRover.direction} - ROVER HAS REACHED THE PERIMETER!`
-          : `Position ${currentRover.position} ${currentRover.direction}`
         if (cutShort) {
-          status += ` (Move cut short by perimeter, moved ${actualDistance}m)`
-          errorMsg = moveBlockedMessage(i, commands[i])
+          const req = parseMovementDistance(rawTrimmed)
+          errorMsg =
+            req !== null
+              ? `#${seq}: Perimeter reached — command shortened from ${req}m to ${actualDistance}m`
+              : `#${seq}: Perimeter reached — completed ${actualDistance}m of ${cmdLog}`
         }
-        commandHistory.push(`Command ${i + 1}: ${commands[i]} → ${status}`)
+        commandHistory.push(
+          missionLogLineForResult(seq, rawTrimmed, cmdLog, currentRover, cutShort, actualDistance)
+        )
         if (perimeterReachedThisBatch) {
           break
         }
@@ -286,15 +363,9 @@ function App() {
   function executeCompassDirection(dir: Direction) {
     setError('')
     const currentRover = { ...rover, isAtPerimeter: isPerimeterSquare(rover.position) }
-    const { newRover, blocked, cutShort, actualDistance } = executeCommand(dir, currentRover)
+    const { newRover, blocked } = executeCommand(dir, currentRover)
     if (blocked) {
       return
-    }
-    let status = newRover.isAtPerimeter
-      ? `Position ${newRover.position} ${newRover.direction} - ROVER HAS REACHED THE PERIMETER!`
-      : `Position ${newRover.position} ${newRover.direction}`
-    if (cutShort) {
-      status += ` (Move cut short by perimeter, moved ${actualDistance}m)`
     }
     setRover(newRover)
     setGrid((prevGrid: GridCell[]) =>
@@ -307,18 +378,23 @@ function App() {
       row: Math.floor((newRover.position - 1) / 100) + 1,
       col: ((newRover.position - 1) % 100) + 1,
     })
-    setHistory((prev: string[]) => [`Compass: ${dir} → ${status}`, ...prev])
+    const seq = nextLogNumberRef.current++
+    let line = `#${seq}: Compass, changed direction — square ${newRover.position}, facing ${newRover.direction}`
+    if (newRover.isAtPerimeter) line += perimeterEdgesSuffix(newRover.position)
+    setHistory((prev: string[]) => [line, ...prev])
   }
 
   // Reset rover to starting position
   function resetRover() {
-    setRover({
+    const start: RoverState = {
       position: 1,
       direction: 'South',
-      isAtPerimeter: isPerimeterSquare(1)
-    })
+      isAtPerimeter: isPerimeterSquare(1),
+    }
+    setRover(start)
     setCommands(['', '', '', '', ''])
-    setHistory([])
+    setHistory([missionStartLogLine(start)])
+    nextLogNumberRef.current = 2
     setError('')
     setGrid((prevGrid: GridCell[]) => 
       prevGrid.map((cell: GridCell) => ({
@@ -339,6 +415,15 @@ function App() {
   const roverGridPos = getRoverGridPosition();
   const [gridViewCenter, setGridViewCenter] = useState<{ row: number; col: number }>(roverGridPos);
   const gridViewSize = useResponsiveGridSize();
+
+  // First visit or empty saved log: seed #1 mission start at current rover (persisted or default).
+  useEffect(() => {
+    setHistory((prev) => {
+      if (prev.length > 0) return prev
+      nextLogNumberRef.current = 2
+      return [missionStartLogLine(rover)]
+    })
+  }, [])
 
   return (
     <div className="app">
