@@ -1,5 +1,23 @@
+import type { MissionLogEntry } from '../App';
+
 interface MissionLogProps {
-  history: string[];
+  history: MissionLogEntry[];
+}
+
+function formatMissionLogTimestamp(ms: number): string {
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+    timeZoneName: 'short',
+  })
+    .format(new Date(ms))
+    .toUpperCase();
 }
 
 const MissionLog: React.FC<MissionLogProps> = ({ history }) => (
@@ -11,7 +29,16 @@ const MissionLog: React.FC<MissionLogProps> = ({ history }) => (
       ) : (
         history.map((entry, index) => (
           <div key={index} className="history-entry">
-            {entry}
+            <span className="history-entry__text">{entry.message}</span>
+            <span className="history-entry__time">
+              {entry.at != null ? (
+                <time dateTime={new Date(entry.at).toISOString()}>
+                  {formatMissionLogTimestamp(entry.at)}
+                </time>
+              ) : (
+                <span className="history-entry__time-placeholder">—</span>
+              )}
+            </span>
           </div>
         ))
       )}
@@ -19,4 +46,4 @@ const MissionLog: React.FC<MissionLogProps> = ({ history }) => (
   </div>
 );
 
-export default MissionLog; 
+export default MissionLog;

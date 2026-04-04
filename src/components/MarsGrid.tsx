@@ -135,7 +135,7 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
   return (
     <div className="grid-section">
       <h2>Mars Surface Grid (Dynamic View)</h2>
-      <p className="grid-info">Drag to pan and explore the grid, Rover is in the green cell.</p>
+      <p className="grid-info">Drag to pan and explore the grid, Rover is in the red cell.</p>
       <div
         className="grid-container"
         ref={gridContainerRef}

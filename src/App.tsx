@@ -23,6 +23,78 @@ interface GridCell {
   isPerimeter: boolean
 }
 
+export interface MissionLogEntry {
+  message: string
+  /** Wall time when the entry was recorded; `null` only for legacy rows without a stored time. */
+  at: number | null
+}
+
+const MISSION_START_LOG_RE = /^#1: Mission start/
+
+function backfillMissionStartAt(entry: MissionLogEntry): MissionLogEntry {
+  if (entry.at != null) return entry
+  if (MISSION_START_LOG_RE.test(entry.message)) {
+    return { ...entry, at: Date.now() }
+  }
+  return entry
+}
+
+function parseHistoryFromStorage(raw: string | null): MissionLogEntry[] {
+  if (!raw) return []
+  try {
+    const parsed = JSON.parse(raw) as unknown
+    if (!Array.isArray(parsed)) return []
+    return parsed
+      .map((item: unknown): MissionLogEntry => {
+        if (typeof item === 'string') return { message: item, at: null }
+        if (item && typeof item === 'object' && item !== null && 'message' in item) {
+          const m = (item as { message: unknown; at?: unknown }).message
+          const at = (item as { at?: unknown }).at
+          if (typeof m === 'string') {
+            return { message: m, at: typeof at === 'number' ? at : null }
+          }
+        }
+        return { message: String(item), at: null }
+      })
+      .map(backfillMissionStartAt)
+  } catch {
+    return []
+  }
+}
+
+function logEntry(message: string): MissionLogEntry {
+  return { message, at: Date.now() }
+}
+
+function pad2(n: number): string {
+  return String(n).padStart(2, '0')
+}
+
+/** UK local time (BST in summer, GMT in winter), e.g. APR 01, 2026 22:35 BST */
+function formatMissionClockLondon(d: Date): string {
+  const fmt = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZoneName: 'short',
+  })
+  const parts = fmt.formatToParts(d)
+  const pick = (type: Intl.DateTimeFormatPart['type']) =>
+    parts.find((p) => p.type === type)?.value ?? ''
+  const month = pick('month')
+  const dayRaw = pick('day')
+  const year = pick('year')
+  const hour = pick('hour')
+  const minute = pick('minute')
+  const tz = pick('timeZoneName')
+  const day = dayRaw.length <= 1 ? pad2(parseInt(dayRaw, 10)) : dayRaw
+  return `${month} ${day}, ${year} ${hour}:${minute} ${tz}`.toUpperCase()
+}
+
 function useResponsiveGridSize() {
   const [gridViewSize, setGridViewSize] = useState(
     window.innerWidth <= 400 ? 7 : window.innerWidth <= 768 ? 10 : 20
@@ -48,12 +120,13 @@ function App() {
   })
   
   const [commands, setCommands] = useState<string[]>(['', '', '', '', ''])
-  const [history, setHistory] = useState<string[]>(() => {
-    const saved = localStorage.getItem('history')
-    return saved ? JSON.parse(saved) : []
-  })
+  const [history, setHistory] = useState<MissionLogEntry[]>(() =>
+    parseHistoryFromStorage(localStorage.getItem('history'))
+  )
   const [error, setError] = useState<string>('')
   const [grid, setGrid] = useState<GridCell[]>([])
+  const [sessionStartMs, setSessionStartMs] = useState(() => Date.now())
+  const [nowMs, setNowMs] = useState(() => Date.now())
 
   /** Running mission-log index (#1, #2, …); continues after saved history; reset with rover. */
   const nextLogNumberRef = useRef(
@@ -77,6 +150,11 @@ function App() {
   useEffect(() => {
     localStorage.setItem('history', JSON.stringify(history))
   }, [history])
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNowMs(Date.now()), 1000)
+    return () => window.clearInterval(id)
+  }, [])
 
   // Initialize the 100x100 grid (10,000 squares)
   useEffect(() => {
@@ -294,7 +372,7 @@ function App() {
     }
     // Reset isAtPerimeter at the start of the batch
     let currentRover = { ...rover, isAtPerimeter: isPerimeterSquare(rover.position) }
-    const commandHistory: string[] = []
+    const commandHistory: MissionLogEntry[] = []
     let perimeterReachedThisBatch = false
     // Execute each command
     for (let i = 0; i < commands.length; i++) {
@@ -307,7 +385,7 @@ function App() {
         if (blocked) {
           const line = missionLogLineBlocked(seq, cmdLog, currentRover)
           errorMsg = line
-          commandHistory.push(line)
+          commandHistory.push(logEntry(line))
           // Do not update rover state for this command
           continue
         } else {
@@ -325,7 +403,9 @@ function App() {
               : `#${seq}: Perimeter reached — completed ${actualDistance}m of ${cmdLog}`
         }
         commandHistory.push(
-          missionLogLineForResult(seq, rawTrimmed, cmdLog, currentRover, cutShort, actualDistance)
+          logEntry(
+            missionLogLineForResult(seq, rawTrimmed, cmdLog, currentRover, cutShort, actualDistance)
+          )
         )
         if (perimeterReachedThisBatch) {
           break
@@ -343,7 +423,7 @@ function App() {
       row: Math.floor((currentRover.position - 1) / 100) + 1,
       col: ((currentRover.position - 1) % 100) + 1
     })
-    setHistory((prev: string[]) => [
+    setHistory((prev: MissionLogEntry[]) => [
       ...[...commandHistory].reverse(),
       ...prev
     ])
@@ -380,9 +460,9 @@ function App() {
       col: ((newRover.position - 1) % 100) + 1,
     })
     const seq = nextLogNumberRef.current++
-    let line = `#${seq}: Compass, changed direction — square ${newRover.position}, facing ${newRover.direction}`
+    let line = `#${seq}: Compass — square ${newRover.position}, facing ${newRover.direction}`
     if (newRover.isAtPerimeter) line += perimeterEdgesSuffix(newRover.position)
-    setHistory((prev: string[]) => [line, ...prev])
+    setHistory((prev: MissionLogEntry[]) => [logEntry(line), ...prev])
   }
 
   // Reset rover to starting position
@@ -394,9 +474,10 @@ function App() {
     }
     setRover(start)
     setCommands(['', '', '', '', ''])
-    setHistory([missionStartLogLine(start)])
+    setHistory([logEntry(missionStartLogLine(start))])
     nextLogNumberRef.current = 2
     setError('')
+    setSessionStartMs(Date.now())
     setGrid((prevGrid: GridCell[]) => 
       prevGrid.map((cell: GridCell) => ({
         ...cell,
@@ -422,9 +503,15 @@ function App() {
     setHistory((prev) => {
       if (prev.length > 0) return prev
       nextLogNumberRef.current = 2
-      return [missionStartLogLine(rover)]
+      return [logEntry(missionStartLogLine(rover))]
     })
   }, [])
+
+  const elapsedSec = Math.max(0, Math.floor((nowMs - sessionStartMs) / 1000))
+  const elapsedDays = Math.floor(elapsedSec / 86400)
+  const elapsedHours = Math.floor((elapsedSec % 86400) / 3600)
+  const elapsedMins = Math.floor((elapsedSec % 3600) / 60)
+  const elapsedSecs = elapsedSec % 60
 
   return (
     <div className="app">
@@ -435,6 +522,41 @@ function App() {
             Mars Rover Control
           </h1>
           <p>Mission Control Center</p>
+        </div>
+        <div className="app-header-timer" aria-live="polite" aria-atomic="true">
+          <p className="app-header-timer__title">Mars Rover Mission Elapsed Time</p>
+          <div
+            className="app-header-timer__elapsed"
+            role="timer"
+            aria-label={`Mission elapsed: ${elapsedDays} days, ${elapsedHours} hours, ${elapsedMins} minutes, ${elapsedSecs} seconds`}
+          >
+            <div className="app-header-timer__elapsed-grid" aria-hidden="true">
+              <span className="app-header-timer__num">{pad2(elapsedDays)}</span>
+              <span className="app-header-timer__colon" aria-hidden="true">
+                <span className="app-header-timer__colon-dot" />
+                <span className="app-header-timer__colon-dot" />
+              </span>
+              <span className="app-header-timer__num">{pad2(elapsedHours)}</span>
+              <span className="app-header-timer__colon" aria-hidden="true">
+                <span className="app-header-timer__colon-dot" />
+                <span className="app-header-timer__colon-dot" />
+              </span>
+              <span className="app-header-timer__num">{pad2(elapsedMins)}</span>
+              <span className="app-header-timer__colon" aria-hidden="true">
+                <span className="app-header-timer__colon-dot" />
+                <span className="app-header-timer__colon-dot" />
+              </span>
+              <span className="app-header-timer__num">{pad2(elapsedSecs)}</span>
+              <span className="app-header-timer__label">Days</span>
+              <span className="app-header-timer__label-gap" />
+              <span className="app-header-timer__label">Hrs</span>
+              <span className="app-header-timer__label-gap" />
+              <span className="app-header-timer__label">Mins</span>
+              <span className="app-header-timer__label-gap" />
+              <span className="app-header-timer__label">Secs</span>
+            </div>
+          </div>
+          <p className="app-header-timer__datetime">{formatMissionClockLondon(new Date(nowMs))}</p>
         </div>
       </header>
 

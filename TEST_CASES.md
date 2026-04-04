@@ -38,7 +38,7 @@ Use these to spot-check UI text (exact `#` depends on session).
 | Move (cut short by map edge) | `#{n}: Moved {actual}m to square {pos}, facing {dir} (command shortened from {requested}m to {actual}m) — at {edge} perimeter` |
 | Direction (mission commands) | `#{n}: Changed direction — square {pos}, facing {dir}` — optional perimeter suffix |
 | Blocked move (already on edge, ordered through edge) | `#{n}: {X}m blocked — square {pos}, facing {dir}` |
-| Compass | `#{n}: Compass, changed direction — square {pos}, facing {dir}` — optional perimeter suffix |
+| Compass | `#{n}: Compass — square {pos}, facing {dir}` — optional perimeter suffix |
 
 **Error banner** (red area under mission commands), when a move is shortened by the perimeter:
 
@@ -161,7 +161,7 @@ Position rover on an edge square facing **outward**, command a move (e.g. `10m`)
 ## 6. Compass
 
 - [ ] Click **N / E / S / W**: heading updates **immediately** (no need to press Execute).
-- [ ] Mission log adds: **`Compass, changed direction — square {pos}, facing {dir}`** (plus perimeter suffix when on edge).
+- [ ] Mission log adds: **`Compass — square {pos}, facing {dir}`** (plus perimeter suffix when on edge).
 - [ ] Next **#** increments like any other action.
 - [ ] Compass needle and active letter match **Rover Status** facing.
 
