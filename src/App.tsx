@@ -59,6 +59,7 @@ function formatMissionClockLondon(d: Date): string {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
+    hourCycle: 'h23',
     timeZoneName: 'short',
   })
   const parts = fmt.formatToParts(d)
@@ -107,7 +108,8 @@ function App() {
   )
   const [error, setError] = useState<string>('')
   const [grid, setGrid] = useState<GridCell[]>([])
-  const [sessionStartMs, setSessionStartMs] = useState(() => Date.now())
+  /** Elapsed mission timer starts only after Enter Mission Control or Reset Rover (not on first paint). */
+  const [sessionStartMs, setSessionStartMs] = useState<number | null>(null)
   const [nowMs, setNowMs] = useState(() => Date.now())
 
   /** Running mission-log index (#1, #2, …); continues after saved history; reset with rover. */
@@ -461,6 +463,7 @@ function App() {
 
   // Reset rover to starting position
   function resetRover() {
+    const t = Date.now()
     const start: RoverState = {
       position: 1,
       direction: 'South',
@@ -468,10 +471,10 @@ function App() {
     }
     setRover(start)
     setCommands(['', '', '', '', ''])
-    setHistory([logEntry(missionStartLogLine(start))])
+    setHistory([{ message: missionStartLogLine(start), at: t }])
     nextLogNumberRef.current = 2
     setError('')
-    setSessionStartMs(Date.now())
+    setSessionStartMs(t)
     setGrid((prevGrid: GridCell[]) => 
       prevGrid.map((cell: GridCell) => ({
         ...cell,
@@ -492,16 +495,10 @@ function App() {
   const [gridViewCenter, setGridViewCenter] = useState<{ row: number; col: number }>(roverGridPos);
   const gridViewSize = useResponsiveGridSize();
 
-  // First visit or empty saved log: seed #1 mission start at current rover (persisted or default).
-  useEffect(() => {
-    setHistory((prev) => {
-      if (prev.length > 0) return prev
-      nextLogNumberRef.current = 2
-      return [logEntry(missionStartLogLine(rover))]
-    })
-  }, [])
-
-  const elapsedSec = Math.max(0, Math.floor((nowMs - sessionStartMs) / 1000))
+  const elapsedSec =
+    sessionStartMs == null
+      ? 0
+      : Math.max(0, Math.floor((nowMs - sessionStartMs) / 1000))
   const elapsedDays = Math.floor(elapsedSec / 86400)
   const elapsedHours = Math.floor((elapsedSec % 86400) / 3600)
   const elapsedMins = Math.floor((elapsedSec % 3600) / 60)
@@ -509,6 +506,7 @@ function App() {
   const missionClockLondon = formatMissionClockLondon(new Date(nowMs))
 
   function enterMission() {
+    const t = Date.now()
     const pos = rover.position
     const newGrid: GridCell[] = []
     for (let i = 1; i <= 10000; i++) {
@@ -519,6 +517,18 @@ function App() {
       })
     }
     setGrid(newGrid)
+    setSessionStartMs(t)
+    setHistory((prev) => {
+      if (prev.length === 0) {
+        nextLogNumberRef.current = 2
+        return [{ message: missionStartLogLine(rover), at: t }]
+      }
+      const first = prev[0]
+      if (MISSION_START_LOG_RE.test(first.message)) {
+        return [{ ...first, at: t }, ...prev.slice(1)]
+      }
+      return prev
+    })
     setShowLanding(false)
   }
 
