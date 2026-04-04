@@ -342,7 +342,13 @@ function getCometRoughnessMap() {
   return cometRoughnessMap
 }
 
-function MarsBody({ reducedMotion }: { reducedMotion: boolean }) {
+function MarsBody({
+  reducedMotion,
+  narrowLayout,
+}: {
+  reducedMotion: boolean
+  narrowLayout: boolean
+}) {
   const ref = useRef<THREE.Mesh>(null)
 
   const { map, roughnessMap } = useMemo(() => createMarsSurfaceTextures(), [])
@@ -358,8 +364,15 @@ function MarsBody({ reducedMotion }: { reducedMotion: boolean }) {
     if (!ref.current || reducedMotion) return
     ref.current.rotation.y += delta * 0.08
   })
+
+  /** Wide: Mars sits stage-left. ≤500px: centered above the rocket stack in frame. */
+  const position = narrowLayout
+    ? ([0, 3.15, -15.2] as const)
+    : ([-9, -0.5, -14] as const)
+  const scale = narrowLayout ? 2.75 : 3.2
+
   return (
-    <mesh ref={ref} position={[-9, -0.5, -14]} scale={3.2}>
+    <mesh ref={ref} position={position} scale={scale}>
       <sphereGeometry args={[1, 64, 64]} />
       <meshStandardMaterial
         map={map}
@@ -820,7 +833,13 @@ function Rocket({ reducedMotion }: { reducedMotion: boolean }) {
   )
 }
 
-function CameraRig({ reducedMotion }: { reducedMotion: boolean }) {
+function CameraRig({
+  reducedMotion,
+  narrowLayout,
+}: {
+  reducedMotion: boolean
+  narrowLayout: boolean
+}) {
   const { camera } = useThree()
   const aimY = 1.55
   useLayoutEffect(() => {
@@ -832,9 +851,12 @@ function CameraRig({ reducedMotion }: { reducedMotion: boolean }) {
   useFrame((state) => {
     if (reducedMotion) return
     const t = state.clock.elapsedTime * 0.12
-    camera.position.x = Math.sin(t) * 2
-    camera.position.y = 2.85 + Math.sin(t * 0.7) * 0.4
-    camera.position.z = 12.5 + Math.cos(t * 0.4) * 0.7
+    const xSway = narrowLayout ? 0 : 2
+    const yBob = narrowLayout ? 0.22 : 0.4
+    const zSway = narrowLayout ? 0.35 : 0.7
+    camera.position.x = Math.sin(t) * xSway
+    camera.position.y = 2.85 + Math.sin(t * 0.7) * yBob
+    camera.position.z = 12.5 + Math.cos(t * 0.4) * zSway
     camera.lookAt(0, aimY, 0)
   })
   return null
@@ -888,7 +910,13 @@ function DebrisField({ reducedMotion }: { reducedMotion: boolean }) {
   )
 }
 
-export function LandingScene({ reducedMotion }: { reducedMotion: boolean }) {
+export function LandingScene({
+  reducedMotion,
+  narrowLayout = false,
+}: {
+  reducedMotion: boolean
+  narrowLayout?: boolean
+}) {
   return (
     <>
       <Environment preset="night" environmentIntensity={0.42} />
@@ -910,7 +938,7 @@ export function LandingScene({ reducedMotion }: { reducedMotion: boolean }) {
 
       <RealisticStarfield reducedMotion={reducedMotion} />
 
-      <MarsBody reducedMotion={reducedMotion} />
+      <MarsBody reducedMotion={reducedMotion} narrowLayout={narrowLayout} />
 
       <OrbitingComet
         radius={5.5}
@@ -985,7 +1013,7 @@ export function LandingScene({ reducedMotion }: { reducedMotion: boolean }) {
         )}
       </group>
 
-      <CameraRig reducedMotion={reducedMotion} />
+      <CameraRig reducedMotion={reducedMotion} narrowLayout={narrowLayout} />
     </>
   )
 }

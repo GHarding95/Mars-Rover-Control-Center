@@ -319,3 +319,37 @@
   background: var(--nasa-red, #fc3d21);
   opacity: 0.6;
 }
+
+@media (max-width: 500px) {
+  .landing-boot__welcome {
+    font-size: clamp(2.2rem, 7.2vw, 3.6rem);
+  }
+
+  .landing-badge {
+    font-size: clamp(0.72rem, 1.65vw, 0.82rem);
+  }
+
+  .landing-title__line {
+    font-size: clamp(2.35rem, 8.5vw, 4rem);
+  }
+
+  .landing-title__accent {
+    font-size: clamp(2.65rem, 9.5vw, 4.6rem);
+  }
+
+  .landing-tagline {
+    font-size: clamp(1rem, 2.35vw, 1.12rem);
+  }
+
+  .landing-enter-btn__label {
+    font-size: clamp(1.08rem, 2.7vw, 1.22rem);
+  }
+
+  .landing-enter-btn__sub {
+    font-size: 0.8rem;
+  }
+
+  .landing-footer {
+    font-size: 0.8rem;
+  }
+}

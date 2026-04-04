@@ -17,6 +17,12 @@ function readReducedMotion(): boolean {
     : false
 }
 
+function readNarrowLandingLayout(): boolean {
+  return typeof window !== 'undefined'
+    ? window.matchMedia('(max-width: 500px)').matches
+    : false
+}
+
 /** Fires once the Suspense boundary above has committed (scene + async drei assets like Environment). */
 function SceneReadyNotifier({ onReady }: { onReady: () => void }) {
   useEffect(() => {
@@ -27,6 +33,7 @@ function SceneReadyNotifier({ onReady }: { onReady: () => void }) {
 
 export default function LandingPage({ onEnter }: LandingPageProps) {
   const [reducedMotion, setReducedMotion] = useState(() => readReducedMotion())
+  const [narrowLayout, setNarrowLayout] = useState(() => readNarrowLandingLayout())
   const [showWelcomeBoot, setShowWelcomeBoot] = useState(() => !readReducedMotion())
   const [bootExiting, setBootExiting] = useState(false)
   /** WebGL + scene assets committed; canvas is shown when true (still behind boot until exit). */
@@ -46,6 +53,14 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
       setReducedMotion(m)
       if (m) setShowWelcomeBoot(false)
     }
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 500px)')
+    setNarrowLayout(mq.matches)
+    const onChange = () => setNarrowLayout(mq.matches)
     mq.addEventListener('change', onChange)
     return () => mq.removeEventListener('change', onChange)
   }, [])
@@ -81,7 +96,7 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
         <color attach="background" args={['#050810']} />
         <fog attach="fog" args={['#050810', 18, 55]} />
         <Suspense fallback={null}>
-          <LandingScene reducedMotion={reducedMotion} />
+          <LandingScene reducedMotion={reducedMotion} narrowLayout={narrowLayout} />
           <SceneReadyNotifier onReady={handleSceneReady} />
         </Suspense>
       </Canvas>
