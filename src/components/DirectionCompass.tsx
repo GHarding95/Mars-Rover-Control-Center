@@ -50,24 +50,19 @@ function DirectionCompass({ direction, onDirectionExecute }: DirectionCompassPro
           aria-label={`Compass showing rover facing ${direction}`}
         >
           <defs>
-            <linearGradient id="compass-ring" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="rgba(255, 107, 53, 0.35)" />
-              <stop offset="100%" stopColor="rgba(42, 82, 152, 0.45)" />
+            <linearGradient id="compass-needle-red" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#c52e18" />
+              <stop offset="50%" stopColor="#fc3d21" />
+              <stop offset="100%" stopColor="#ff8a78" />
             </linearGradient>
-            <linearGradient id="compass-needle" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#ff8f5a" />
-              <stop offset="100%" stopColor="#ff6b35" />
+            <linearGradient id="compass-needle-blue" x1="100%" y1="0%" x2="0%" y2="0%">
+              <stop offset="0%" stopColor="#061f4d" />
+              <stop offset="55%" stopColor="#0b3d91" />
+              <stop offset="100%" stopColor="#0e4cb3" />
             </linearGradient>
-            <filter id="compass-glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="1.5" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
           </defs>
 
-          <circle cx="100" cy="100" r="92" fill="rgba(0, 0, 0, 0.22)" stroke="url(#compass-ring)" strokeWidth="3" />
+          <circle cx="100" cy="100" r="92" fill="rgba(0, 0, 0, 0.22)" stroke="#0e4cb3" strokeWidth="3" />
           <circle cx="100" cy="100" r="84" fill="none" stroke="rgba(255, 255, 255, 0.07)" strokeWidth="1" />
 
           {[0, 90, 180, 270].map((deg) => (
@@ -82,14 +77,15 @@ function DirectionCompass({ direction, onDirectionExecute }: DirectionCompassPro
             />
           ))}
 
-          <g style={{ pointerEvents: 'none' }} transform={`rotate(${needleAngle} 100 100)`} filter="url(#compass-glow)">
-            <polygon points="168,100 100,91 100,109" fill="url(#compass-needle)" />
-            <polygon points="32,100 100,91 100,109" fill="rgba(30, 60, 114, 0.9)" />
+          {/* Classic compass needle: NASA red = facing direction, NASA blue = opposite (equal lobes) */}
+          <g style={{ pointerEvents: 'none' }} transform={`rotate(${needleAngle} 100 100)`}>
+            <polygon points="168,100 100,91 100,109" fill="url(#compass-needle-red)" stroke="rgba(255, 255, 255, 0.35)" strokeWidth="0.75" strokeLinejoin="round" />
+            <polygon points="32,100 100,91 100,109" fill="url(#compass-needle-blue)" stroke="rgba(255, 255, 255, 0.2)" strokeWidth="0.75" strokeLinejoin="round" />
           </g>
 
           <g style={{ pointerEvents: 'none' }}>
-            <circle cx="100" cy="100" r="8" fill="#1a1a2e" stroke="#ff6b35" strokeWidth="2" />
-            <circle cx="100" cy="100" r="3" fill="#ff6b35" />
+            <circle cx="100" cy="100" r="8" fill="#0b3d91" stroke="#0e4cb3" strokeWidth="2" />
+            <circle cx="100" cy="100" r="3" fill="#9ec5ff" />
           </g>
 
           <g className="direction-compass__labels">

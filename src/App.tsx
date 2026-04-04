@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Analytics } from "@vercel/analytics/react";
 import './App.css';
+import marsLogo from './assets/Mars.png';
 import RoverStatus from './components/RoverStatus';
 import DirectionCompass from './components/DirectionCompass';
 import MissionCommands from './components/MissionCommands';
@@ -429,7 +430,10 @@ function App() {
     <div className="app">
       <header className="app-header">
         <div className="app-logo">
-          <h1>🚀 Mars Rover Control</h1>
+          <h1>
+            <img src={marsLogo} alt="" className="app-logo-mars" aria-hidden />
+            Mars Rover Control
+          </h1>
           <p>Mission Control Center</p>
         </div>
       </header>
