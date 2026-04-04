@@ -4,6 +4,14 @@ interface MissionLogProps {
   history: MissionLogEntry[];
 }
 
+/** Left-border accent: mission start = green; blocked / shortened path = red; else default blue (see App.css). */
+function historyEntryAccentClass(message: string): string {
+  if (/^#1:\s*Mission start\b/.test(message)) return 'history-entry--start'
+  if (/\bblocked\b/.test(message)) return 'history-entry--alert'
+  if (/command shortened from/i.test(message)) return 'history-entry--alert'
+  return ''
+}
+
 function formatMissionLogTimestamp(ms: number): string {
   return new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Europe/London',
@@ -28,7 +36,10 @@ const MissionLog: React.FC<MissionLogProps> = ({ history }) => (
         <p className="no-history">No commands executed yet.</p>
       ) : (
         history.map((entry, index) => (
-          <div key={index} className="history-entry">
+          <div
+            key={index}
+            className={`history-entry ${historyEntryAccentClass(entry.message)}`.trim()}
+          >
             <span className="history-entry__text">{entry.message}</span>
             <span className="history-entry__time">
               {entry.at != null ? (

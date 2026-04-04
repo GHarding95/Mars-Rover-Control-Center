@@ -18,8 +18,11 @@ interface MarsGridProps {
 const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter, setGridViewCenter, onReturnToRover, gridViewSize }) => {
   const dragging = useRef(false);
   const lastPos = useRef<{ x: number; y: number } | null>(null);
+  const gridViewCenterRef = useRef(gridViewCenter);
   const [_, setDraggingState] = useState(false); // for re-render
   const gridContainerRef = useRef<HTMLDivElement>(null);
+
+  gridViewCenterRef.current = gridViewCenter;
 
   // Calculate rover's actual position
   const roverRow = Math.floor((roverPosition - 1) / 100) + 1;
@@ -64,36 +67,58 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
       lastPos.current = { x: e.clientX, y: e.clientY };
     }
   };
-  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    dragging.current = true;
-    lastPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    setDraggingState(true);
-  };
-  const handleTouchEnd = () => {
-    dragging.current = false;
-    lastPos.current = null;
-    setDraggingState(false);
-  };
-  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (!dragging.current || !lastPos.current) return;
-    e.preventDefault();
-    const dx = e.touches[0].clientX - lastPos.current.x;
-    const dy = e.touches[0].clientY - lastPos.current.y;
-    const cellSize = 25;
-    if (Math.abs(dx) >= cellSize || Math.abs(dy) >= cellSize) {
-      const dCol = -Math.round(dx / cellSize);
-      const dRow = -Math.round(dy / cellSize);
-      let newRow = gridViewCenter.row + dRow;
-      let newCol = gridViewCenter.col + dCol;
-      if (newRow < 1) newRow = 1;
-      if (newRow > 100) newRow = 100;
-      if (newCol < 1) newCol = 1;
-      if (newCol > 100) newCol = 100;
-      setGridViewCenter({ row: newRow, col: newCol });
+  // Touch: React's delegated listeners are passive, so preventDefault() fails.
+  // Native listeners with { passive: false } allow blocking scroll while panning.
+  useEffect(() => {
+    const el = gridContainerRef.current;
+    if (!el) return;
+
+    const onTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
+      dragging.current = true;
       lastPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    }
-  };
+      setDraggingState(true);
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!dragging.current || !lastPos.current) return;
+      e.preventDefault();
+      const center = gridViewCenterRef.current;
+      const dx = e.touches[0].clientX - lastPos.current.x;
+      const dy = e.touches[0].clientY - lastPos.current.y;
+      const cellSize = 25;
+      if (Math.abs(dx) >= cellSize || Math.abs(dy) >= cellSize) {
+        const dCol = -Math.round(dx / cellSize);
+        const dRow = -Math.round(dy / cellSize);
+        let newRow = center.row + dRow;
+        let newCol = center.col + dCol;
+        if (newRow < 1) newRow = 1;
+        if (newRow > 100) newRow = 100;
+        if (newCol < 1) newCol = 1;
+        if (newCol > 100) newCol = 100;
+        setGridViewCenter({ row: newRow, col: newCol });
+        lastPos.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+    };
+
+    const onTouchEnd = () => {
+      dragging.current = false;
+      lastPos.current = null;
+      setDraggingState(false);
+    };
+
+    el.addEventListener('touchstart', onTouchStart, { passive: false });
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    el.addEventListener('touchend', onTouchEnd);
+    el.addEventListener('touchcancel', onTouchEnd);
+
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
+      el.removeEventListener('touchcancel', onTouchEnd);
+    };
+  }, [setGridViewCenter]);
 
   // Prevent scroll when mouse/touch is over grid
   useEffect(() => {
@@ -143,11 +168,7 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onMouseMove={handleMouseMove}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchEnd}
-        onTouchMove={handleTouchMove}
-        // onMouseEnter/onMouseLeave handled by event listeners
+        // onMouseEnter/onMouseLeave handled by event listeners; touch uses native listeners (see useEffect)
       >
         <div
           className="grid"
