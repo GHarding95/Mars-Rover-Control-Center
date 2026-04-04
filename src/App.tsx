@@ -200,8 +200,13 @@ function App() {
     return ` — at ${edges[0]} and ${edges[1]} perimeters`
   }
 
+  /** Wording for rover place + heading in mission log lines (e.g. after em dash). */
+  function missionLogPositionDirection(square: number, direction: Direction): string {
+    return `Square ${square}, Facing ${direction}`
+  }
+
   function missionStartLogLine(r: RoverState): string {
-    let line = `#1: Mission start — square ${r.position}, facing ${r.direction}`
+    let line = `#1: Mission start: ${missionLogPositionDirection(r.position, r.direction)}`
     if (r.isAtPerimeter) line += perimeterEdgesSuffix(r.position)
     return line
   }
@@ -243,14 +248,14 @@ function App() {
     const sq = roverAfter.position
     const face = roverAfter.direction
     if (parseCardinalDirection(rawTrimmed) !== null) {
-      let line = `#${seq}: Changed direction — square ${sq}, facing ${face}`
+      let line = `#${seq}: Changed direction — ${missionLogPositionDirection(sq, face)}`
       if (roverAfter.isAtPerimeter) line += perimeterEdgesSuffix(sq)
       return line
     }
     const requestedM = parseMovementDistance(rawTrimmed)
     const movedLabel =
       cutShort && requestedM !== null ? `${actualDistance}m` : cmdLog
-    let line = `#${seq}: Moved ${movedLabel} to square ${sq}, facing ${face}`
+    let line = `#${seq}: Moved ${movedLabel} to ${missionLogPositionDirection(sq, face)}`
     if (cutShort && requestedM !== null) {
       line += ` (command shortened from ${requestedM}m to ${actualDistance}m)`
       line += perimeterEdgesSuffix(sq)
@@ -260,8 +265,25 @@ function App() {
     return line
   }
 
-  function missionLogLineBlocked(seq: number, cmdLog: string, roverAt: RoverState): string {
-    return `#${seq}: ${cmdLog} blocked — square ${roverAt.position}, facing ${roverAt.direction}`
+  function missionLogLineBlocked(
+    seq: number,
+    cmdLog: string,
+    roverAt: RoverState,
+    skippedFurtherCommands: boolean
+  ): string {
+    const posDir = missionLogPositionDirection(roverAt.position, roverAt.direction)
+    if (skippedFurtherCommands) {
+      return `#${seq}: Blocked: ${cmdLog}, PERIMETER REACHED, no further commands were executed in the sequence — ${posDir}`
+    }
+    return `#${seq}: Blocked: ${cmdLog}, PERIMETER REACHED — ${posDir}`
+  }
+
+  /** True if any slot after `index` has a non-empty command (remaining sequence would have run). */
+  function hasNonEmptyCommandsAfter(commandsList: string[], index: number): boolean {
+    for (let j = index + 1; j < commandsList.length; j++) {
+      if (commandsList[j].trim()) return true
+    }
+    return false
   }
 
   // Validate command format
@@ -383,11 +405,14 @@ function App() {
         const prevAtPerimeter = currentRover.isAtPerimeter
         const { newRover, blocked, cutShort, actualDistance } = executeCommand(commands[i], currentRover)
         if (blocked) {
-          const line = missionLogLineBlocked(seq, cmdLog, currentRover)
-          errorMsg = line
+          const skippedFurther = hasNonEmptyCommandsAfter(commands, i)
+          const line = missionLogLineBlocked(seq, cmdLog, currentRover, skippedFurther)
           commandHistory.push(logEntry(line))
-          // Do not update rover state for this command
-          continue
+          errorMsg = skippedFurther
+            ? `Blocked: ${cmdLog}, PERIMETER REACHED, no further commands were executed in the sequence — ${missionLogPositionDirection(currentRover.position, currentRover.direction)}`
+            : line
+          // Do not update rover state for this command; abort rest of sequence
+          break
         } else {
           currentRover = newRover
         }
@@ -460,7 +485,7 @@ function App() {
       col: ((newRover.position - 1) % 100) + 1,
     })
     const seq = nextLogNumberRef.current++
-    let line = `#${seq}: Compass — square ${newRover.position}, facing ${newRover.direction}`
+    let line = `#${seq}: Compass — ${missionLogPositionDirection(newRover.position, newRover.direction)}`
     if (newRover.isAtPerimeter) line += perimeterEdgesSuffix(newRover.position)
     setHistory((prev: MissionLogEntry[]) => [logEntry(line), ...prev])
   }

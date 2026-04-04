@@ -29,20 +29,23 @@ Invalid commands in **any** filled slot cause **no** execution for the whole bat
 
 ## Mission log line patterns (reference)
 
-Use these to spot-check UI text (exact `#` depends on session).
+Use these to spot-check UI text (exact `#` depends on session). Place and heading use **`Square {n}, Facing {Dir}`** (capital **S** / **F**).
 
 | Event | Pattern |
 |--------|---------|
-| Mission start | `#1: Mission start — square {pos}, facing {dir}` — optional ` — at {North\|East\|South\|West} perimeter` or corner ` — at {Edge} and {Edge} perimeters` |
-| Move (full) | `#{n}: Moved {X}m to square {pos}, facing {dir}` — optional ` — at {edge} perimeter` |
-| Move (cut short by map edge) | `#{n}: Moved {actual}m to square {pos}, facing {dir} (command shortened from {requested}m to {actual}m) — at {edge} perimeter` |
-| Direction (mission commands) | `#{n}: Changed direction — square {pos}, facing {dir}` — optional perimeter suffix |
-| Blocked move (already on edge, ordered through edge) | `#{n}: {X}m blocked — square {pos}, facing {dir}` |
-| Compass | `#{n}: Compass — square {pos}, facing {dir}` — optional perimeter suffix |
+| Mission start | `#1: Mission start: Square {pos}, Facing {dir}` — optional ` — at {North\|East\|South\|West} perimeter` or corner ` — at {Edge} and {Edge} perimeters` |
+| Move (full) | `#{n}: Moved {X}m to Square {pos}, Facing {dir}` — optional perimeter suffix |
+| Move (cut short by map edge) | `#{n}: Moved {actual}m to Square {pos}, Facing {dir} (command shortened from {requested}m to {actual}m) — at {edge} perimeter` (or combined corner wording) |
+| Direction (mission commands) | `#{n}: Changed direction — Square {pos}, Facing {dir}` — optional perimeter suffix |
+| Blocked move (on perimeter, move would leave map) | `#{n}: Blocked: {X}m, PERIMETER REACHED — Square {pos}, Facing {dir}` |
+| Blocked move **and** later non-empty slots existed | Same as above, plus: `, no further commands were executed in the sequence` before the em dash and place/heading |
+| Compass | `#{n}: Compass — Square {pos}, Facing {dir}` — optional perimeter suffix |
 
-**Error banner** (red area under mission commands), when a move is shortened by the perimeter:
+**Error banner** (red area under Mission Commands):
 
-- `#{n}: Perimeter reached — command shortened from {requested}m to {actual}m`
+- **Cut short** (move clamped to edge): `#{n}: Perimeter reached — command shortened from {requested}m to {actual}m` (or, if distance parsing is ambiguous: `#{n}: Perimeter reached — completed {actual}m of {cmd}`).
+- **Blocked, no further non-empty commands after this slot**: same text as the blocked **mission log** line (includes `#{n}:`).
+- **Blocked, with at least one further non-empty command** in the batch: `Blocked: {X}m, PERIMETER REACHED, no further commands were executed in the sequence — Square {pos}, Facing {dir}` (**no** `#{n}:` prefix in the banner).
 
 In the log, bare distances are normalized with **`m`** (e.g. input `5` → `5m` in text).
 
@@ -60,7 +63,7 @@ For a “clean” first-run test, use private browsing or clear site data, or re
 ## 1. Initial load and mission start
 
 - [ ] Rover Status: **Square 1**, **South**, grid **Row 1, Col 1** (or persisted state if saved).
-- [ ] With **empty** saved history: Mission Log ends up with **`#1: Mission start — square …, facing …`** (and perimeter suffix if start square is on an edge — default square 1 is **North and West perimeters**).
+- [ ] With **empty** saved history: Mission Log ends up with **`#1: Mission start: Square …, Facing …`** (and perimeter suffix if start square is on an edge — default square 1 is **North and West perimeters**).
 - [ ] Mission Log is **not** stuck on “No commands executed yet” once the start line is seeded (after first effect).
 - [ ] **Direction Compass** shows heading consistent with Rover Status; **N/E/S/W** are clickable.
 
@@ -73,7 +76,7 @@ For a “clean” first-run test, use private browsing or clear site data, or re
 **Commands**: `50m` (one field), Execute.
 
 - [ ] Rover at square **5001** (row 51, col 1), facing **South** (unchanged).
-- [ ] Log includes something like: `Moved 50m to square 5001, facing South` with **`#2`** if mission start was `#1` (numbers depend on session).
+- [ ] Log includes something like: `Moved 50m to Square 5001, Facing South` with **`#2`** if mission start was `#1` (numbers depend on session).
 
 ### 2.2 Bare number = meters
 
@@ -97,7 +100,7 @@ For a “clean” first-run test, use private browsing or clear site data, or re
 **Commands**: `East`, Execute.
 
 - [ ] Position unchanged; facing **East**.
-- [ ] Log: `Changed direction — square {pos}, facing East` (with `#n` and perimeter suffix if on an edge).
+- [ ] Log: `Changed direction — Square {pos}, Facing East` (with `#n` and perimeter suffix if on an edge).
 
 ### 3.2 Sequence East → West → North
 
@@ -133,7 +136,7 @@ For a “clean” first-run test, use private browsing or clear site data, or re
 **Commands**: `99m` from square 1 (South).
 
 - [ ] Ends **9901** (row 100, col 1); Rover Status shows perimeter / grid on south edge.
-- [ ] Log: `Moved … to square 9901, facing South` with **` — at South perimeter`** (or combined corner wording if applicable).
+- [ ] Log: `Moved … to Square 9901, Facing South` with **` — at South perimeter`** (or combined corner wording if applicable).
 
 ### 5.2 Overshoot (clamp)
 
@@ -141,27 +144,36 @@ For a “clean” first-run test, use private browsing or clear site data, or re
 
 - [ ] Stops at **9901**; move is **cut short** (actual distance 99).
 - [ ] Log shows **actual** meters in “Moved”, plus `(command shortened from 150m to 99m)` and **perimeter edge** suffix.
-- [ ] Error area may show: **`Perimeter reached — command shortened from 150m to 99m`**.
+- [ ] Error area may show: **`#n: Perimeter reached — command shortened from 150m to 99m`** (exact `#n` depends on session).
 
 ### 5.3 Batch stops after first perimeter hit
 
-From an interior square, use a sequence that reaches the perimeter mid-batch.
+From an interior square, use a sequence that reaches the perimeter mid-batch (e.g. one long move that lands on the edge, then another command).
 
-- [ ] Commands **after** the one that first reaches the perimeter **do not run** (perimeter stop rule).
+- [ ] Commands **after** the one that first puts the rover **on** the perimeter **do not run** (perimeter stop rule). The rover ends where it first touched the perimeter.
 
 ### 5.4 Blocked move (already on perimeter, drive outward)
 
-Position rover on an edge square facing **outward**, command a move (e.g. `10m`).
+Position rover on an edge square facing **outward**, command a **single** move (e.g. `10m`) with **no** other non-empty command fields after it.
 
-- [ ] Rover does not leave the map; log line **`… blocked — square …, facing …`**.
-- [ ] Error text reflects blocked move (same line may appear in error region).
+- [ ] Rover does not move; position and facing unchanged.
+- [ ] Mission log: **`#n: Blocked: 10m, PERIMETER REACHED — Square {pos}, Facing {dir}`** (distance reflects input, e.g. `10m` or `10`).
+- [ ] Error banner matches that log line (includes **`#n:`**).
+
+### 5.5 Blocked move with more commands in the batch
+
+Same as **5.4**, but add a **second non-empty** command after the blocked move (e.g. slot 1: `10m`, slot 2: `East`).
+
+- [ ] The second command **does not run** (blocked move aborts the rest of the sequence).
+- [ ] Mission log includes **`no further commands were executed in the sequence`** in the blocked line.
+- [ ] Error banner: **`Blocked: 10m, PERIMETER REACHED, no further commands were executed in the sequence — Square {pos}, Facing {dir}`** (no **`#n:`** in the banner).
 
 ---
 
 ## 6. Compass
 
 - [ ] Click **N / E / S / W**: heading updates **immediately** (no need to press Execute).
-- [ ] Mission log adds: **`Compass — square {pos}, facing {dir}`** (plus perimeter suffix when on edge).
+- [ ] Mission log adds: **`Compass — Square {pos}, Facing {dir}`** (plus perimeter suffix when on edge).
 - [ ] Next **#** increments like any other action.
 - [ ] Compass needle and active letter match **Rover Status** facing.
 
@@ -173,7 +185,7 @@ Position rover on an edge square facing **outward**, command a move (e.g. `10m`)
 
 **Commands**: `up`, `abc`, `50km`, Execute.
 
-- [ ] Error lists invalid slot / format; **no** rover change.
+- [ ] Error includes **`Invalid command at position {k}`** and the **valid commands** help line; **no** rover change.
 
 ### 7.2 Mixed batch (invalid in one slot)
 
@@ -195,7 +207,7 @@ All fields empty, Execute.
 2. Click **Reset Rover**.
 
 - [ ] Rover: square **1**, **South**, grid 1,1.
-- [ ] Mission log replaced by **`#1: Mission start — square 1, facing South`** (plus north/west corner perimeter suffix for square 1).
+- [ ] Mission log replaced by **`#1: Mission start: Square 1, Facing South`** (plus north/west corner perimeter suffix for square 1).
 - [ ] `nextLogNumberRef` behavior: next logged action should be **`#2`**.
 - [ ] Command inputs cleared; error cleared.
 
@@ -212,14 +224,16 @@ All fields empty, Execute.
 
 ## 10. Responsiveness and UX
 
-- [ ] Dashboard readable on small widths; mission log lines **wrap** (no clipped “square” text).
+- [ ] Dashboard readable on small widths; mission log lines **wrap** (no clipped “Square” text).
+- [ ] Mission log entries whose message contains **blocked** (case-insensitive) use the **alert** styling (e.g. red accent), consistent with other error-adjacent lines.
 - [ ] Execute / Reset remain usable touch targets.
 
 ---
 
 ## 11. Edge cases
 
-- [ ] **Maximum five** non-empty commands per Execute all run in order (until perimeter stop).
+- [ ] **Maximum five** non-empty commands per Execute: they run in order until **perimeter stop** (section 5.3) or **blocked move** (section 5.5), whichever happens first.
+- [ ] **Empty slots between commands** do not count as “commands after” for blocked copy: only **non-empty** later fields trigger the extended error / log phrase in section 5.5.
 - [ ] **localStorage**: reload preserves rover and history where expected.
 
 ---
@@ -228,7 +242,7 @@ All fields empty, Execute.
 
 - Correct movement and clamping on a 100×100 grid.
 - Absolute cardinal facing (not turn-by-turn).
-- Perimeter detection, cut-short moves, blocked moves, and batch stop at perimeter.
+- Perimeter detection, cut-short moves, blocked moves, batch stop at perimeter, and **aborting the rest of the batch** after a blocked move when further commands were queued.
 - Mission log formats and **`#`** sequencing as documented.
 - Compass applies facing immediately with correct log line.
 - Validation blocks the whole batch on any invalid command.
@@ -236,4 +250,4 @@ All fields empty, Execute.
 
 ---
 
-**Document status**: aligned with current app behavior (mission log wording, compass, bare distances, perimeter labels, `localStorage`, reset + `#1` mission start).
+**Document status**: aligned with current app behavior (mission log wording: `Mission start:`, `Square` / `Facing`, `Blocked:` / `PERIMETER REACHED`, blocked batch abort, error banner variants with/without `#{n}:`, compass, bare distances, perimeter labels, `localStorage`, reset + `#1` mission start).

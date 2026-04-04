@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { MissionLogEntry } from '../App';
 
 interface MissionLogProps {
@@ -7,7 +8,7 @@ interface MissionLogProps {
 /** Left-border accent: mission start = green; blocked / shortened path = red; else default blue (see App.css). */
 function historyEntryAccentClass(message: string): string {
   if (/^#1:\s*Mission start\b/.test(message)) return 'history-entry--start'
-  if (/\bblocked\b/.test(message)) return 'history-entry--alert'
+  if (/\bblocked\b/i.test(message)) return 'history-entry--alert'
   if (/command shortened from/i.test(message)) return 'history-entry--alert'
   return ''
 }
@@ -28,6 +29,31 @@ function formatMissionLogTimestamp(ms: number): string {
     .toUpperCase();
 }
 
+/** Highlights “Mission start:” in #1 lines using --mission-log-start (see App.css). */
+function missionLogMessageContent(message: string): ReactNode {
+  const withColon = message.match(/^(#1:\s*)(Mission start:)(.*)$/);
+  if (withColon) {
+    return (
+      <>
+        {withColon[1]}
+        <span className="history-entry__mission-start-label">{withColon[2]}</span>
+        {withColon[3]}
+      </>
+    );
+  }
+  const legacyEmDash = message.match(/^(#1:\s*)(Mission start)( —.*)$/);
+  if (legacyEmDash) {
+    return (
+      <>
+        {legacyEmDash[1]}
+        <span className="history-entry__mission-start-label">{legacyEmDash[2]}</span>
+        {legacyEmDash[3]}
+      </>
+    );
+  }
+  return message;
+}
+
 const MissionLog: React.FC<MissionLogProps> = ({ history }) => (
   <div className="history-section">
     <h2>Mission Log</h2>
@@ -40,7 +66,7 @@ const MissionLog: React.FC<MissionLogProps> = ({ history }) => (
             key={index}
             className={`history-entry ${historyEntryAccentClass(entry.message)}`.trim()}
           >
-            <span className="history-entry__text">{entry.message}</span>
+            <span className="history-entry__text">{missionLogMessageContent(entry.message)}</span>
             <span className="history-entry__time">
               {entry.at != null ? (
                 <time dateTime={new Date(entry.at).toISOString()}>

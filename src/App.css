@@ -684,6 +684,10 @@ body {
   word-break: break-word;
 }
 
+.history-entry__mission-start-label {
+  color: var(--mission-log-start);
+}
+
 .history-entry__time {
   flex: 0 0 auto;
   text-align: right;
