@@ -128,6 +128,12 @@ export default function MissionControl({
         </div>
         <MissionLog history={history} />
       </main>
+
+      <footer className="app-footer">
+        <p className="app-footer__credit">
+          © {new Date().getFullYear()} Glen Harding
+        </p>
+      </footer>
     </div>
   )
 }
