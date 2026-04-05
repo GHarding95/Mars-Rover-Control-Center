@@ -1,26 +1,50 @@
-/* Mars Rover Control - Mission Control Center Styling */
-/* NASA-inspired palette: red #FC3D21, blue #0B3D91, white #ffffff */
+/* Mars Rover Control — “Lunar Ops” night console (bg #17171b fixed). */
+/* Mission Log entry stripes: fixed green / blue / red hex in .history-entry* only — do not retune. */
 
 :root {
   --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Canvas (locked) */
   --app-bg: #17171b;
-  --app-bg-lift: #23232b;
-  --app-surface: #1f1f24;
-  --app-surface-hover: #26262d;
-  --app-border: rgba(11, 61, 145, 0.35);
-  --app-border-subtle: rgba(255, 255, 255, 0.06);
-  --nasa-red: #fc3d21;
-  --nasa-red-light: #ff6a56;
-  --nasa-red-dark: #c52e18;
+
+  /* Graphite surfaces */
+  --app-bg-lift: #1c1f27;
+  --app-surface: #21252f;
+  --app-surface-hover: #2a2f3b;
+  --app-border: rgba(255, 255, 255, 0.07);
+  --app-border-subtle: rgba(255, 255, 255, 0.045);
+
+  /* Typography */
+  --text-bright: #f2f4f8;
+  --text-primary: #e4e8ef;
+  --text-secondary: #c8cfdb;
+  --text-muted: #8e98ab;
+  --text-muted-dark: #656e80;
+
+  /* NASA primaries (UI chrome — not mission-log fixed stripes) */
   --nasa-blue: #0b3d91;
   --nasa-blue-light: #0e4cb3;
   --nasa-blue-dark: #061f4d;
+  --nasa-red: #fc3d21;
+  --nasa-red-dim: rgba(252, 61, 33, 0.22);
+  --accent-ice: #9cc2e5;
+  --accent-ice-dim: rgba(156, 194, 229, 0.14);
+
+  /* Legacy names — map into theme */
   --nasa-white: #ffffff;
-  --nasa-off-white: #e8eaed;
-  --nasa-muted: #9ca8bc;
-  --nasa-muted-dark: #6b7588;
-  --nasa-red-glow: rgba(252, 61, 33, 0.35);
-  --mission-log-start: #34c759;
+  --nasa-off-white: var(--text-secondary);
+  --nasa-muted: var(--text-muted);
+  --nasa-muted-dark: var(--text-muted-dark);
+
+  /* Map — rover uses NASA blue in cells; NASA red boundary (muted) */
+  --map-rover-halo: rgba(11, 61, 145, 0.42);
+  --map-perimeter-fill: rgba(252, 61, 33, 0.07);
+  --map-perimeter-border: rgba(252, 61, 33, 0.32);
+  --map-perimeter-inset: rgba(252, 61, 33, 0.06);
+
+  /* UI danger (forms / status — not mission log stripes) */
+  --ui-danger: #fc3d21;
+  --ui-danger-bg: rgba(252, 61, 33, 0.1);
 }
 
 /* Global Styles */
@@ -39,7 +63,7 @@ html, body {
 body {
   font-family: var(--font-sans);
   background: var(--app-bg);
-  color: var(--nasa-off-white);
+  color: var(--text-primary);
   min-height: 100vh;
   width: 100%;
 }
@@ -52,7 +76,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Header — NASA blue bar (grid: title | timer | Mars) */
+/* Header — night bridge: blends into canvas; NASA red hairline */
 .app-header {
   position: relative;
   display: grid;
@@ -60,14 +84,10 @@ body {
   align-items: center;
   gap: clamp(0.75rem, 2vw, 1.25rem);
   min-height: 9rem;
-  background: linear-gradient(
-    180deg,
-    var(--nasa-blue-light) 0%,
-    var(--nasa-blue) 42%,
-    var(--nasa-blue-dark) 100%
-  );
+  background: linear-gradient(180deg, #141820 0%, #10151c 48%, var(--app-bg) 100%);
   padding: 1.35rem 2rem 1.5rem;
-  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.45);
+  border-bottom: 2px solid var(--nasa-red-dim);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.55);
 }
 
 .app-logo {
@@ -128,7 +148,7 @@ body {
 
 .app-header-timer__elapsed {
   margin: 0 0 0.65rem;
-  color: #288bff;
+  color: var(--nasa-blue-light);
 }
 
 .app-header-timer__elapsed-grid {
@@ -149,8 +169,8 @@ body {
   font-size: clamp(1.65rem, 5vw, 2.85rem);
   line-height: 1;
   letter-spacing: 0.04em;
-  color: #288bff;
-  text-shadow: 0 0 12px rgba(40, 139, 255, 0.35);
+  color: var(--nasa-blue-light);
+  text-shadow: 0 0 16px rgba(14, 76, 179, 0.4);
 }
 
 .app-header-timer__colon {
@@ -168,9 +188,9 @@ body {
   display: block;
   width: clamp(6px, 1.15vw, 8px);
   height: clamp(6px, 1.15vw, 8px);
-  background-color: #288bff;
+  background-color: var(--nasa-blue-light);
   border-radius: 1px;
-  box-shadow: 0 0 6px rgba(40, 139, 255, 0.45);
+  box-shadow: 0 0 8px rgba(14, 76, 179, 0.45);
 }
 
 .app-header-timer__label {
@@ -179,7 +199,7 @@ body {
   font-weight: 600;
   letter-spacing: 0.18em;
   line-height: 1.15;
-  color: #288bff;
+  color: rgba(200, 210, 225, 0.82);
   text-transform: uppercase;
 }
 
@@ -210,15 +230,15 @@ body {
   /* Higher floor + gentler vw so mobile stays readable (nowrap needs room). */
   font-size: clamp(1.5rem, 0.82rem + 1.85vw, 2.5rem);
   font-weight: bold;
-  color: var(--nasa-white);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  color: var(--text-bright);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   white-space: nowrap;
 }
 
 .app-logo p {
   margin: 0;
   font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.88);
+  color: var(--text-muted);
   font-weight: 400;
   letter-spacing: 0.03em;
 }
@@ -229,6 +249,7 @@ body {
   padding: 2rem 2rem 1rem 2rem;
   width: 100%;
   max-width: 100%;
+  background: radial-gradient(ellipse 90% 55% at 50% -5%, rgba(252, 61, 33, 0.04) 0%, transparent 55%);
 }
 
 .app-footer {
@@ -278,19 +299,23 @@ body {
 
 .rover-status, .command-section, .direction-compass {
   min-width: 0;
-  background: var(--app-surface);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.025) 0%, transparent 42%), var(--app-surface);
   border: 1px solid var(--app-border);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 1.5rem;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .rover-status h2, .command-section h2, .direction-compass h2 {
-  color: var(--nasa-white);
+  color: var(--text-bright);
   margin-bottom: 1rem;
   font-size: clamp(1.15rem, 2.8vw, 1.5rem);
-  border-bottom: 2px solid var(--nasa-blue-light);
+  border-bottom: 2px solid var(--nasa-red-dim);
   padding-bottom: 0.5rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
 }
 
 .direction-compass__body {
@@ -312,13 +337,13 @@ body {
   font-family: var(--font-sans);
   font-size: clamp(14px, 3.8vw, 18px);
   font-weight: 700;
-  fill: var(--nasa-muted);
+  fill: rgba(107, 117, 136, 0.92);
   transition: fill 0.2s ease, filter 0.2s ease;
 }
 
 .direction-compass__letter--active {
-  fill: var(--nasa-white);
-  filter: drop-shadow(0 0 6px rgba(11, 61, 145, 0.65));
+  fill: var(--accent-ice);
+  filter: drop-shadow(0 0 6px rgba(156, 194, 229, 0.4));
 }
 
 .direction-compass__caption {
@@ -353,7 +378,7 @@ body {
 }
 
 .direction-compass__dir--clickable:hover .direction-compass__letter:not(.direction-compass__letter--active) {
-  fill: var(--nasa-off-white);
+  fill: #ffffff;
 }
 
 .status-display {
@@ -368,14 +393,14 @@ body {
   gap: 0.5rem;
   justify-content: space-between;
   padding: 0.8rem;
-  background: var(--app-bg);
+  background: rgba(0, 0, 0, 0.22);
   border-radius: 8px;
-  border-left: 3px solid var(--nasa-blue-light);
+  border-left: 3px solid var(--nasa-blue);
 }
 
 .status-item.warning {
-  border-left-color: var(--nasa-red);
-  background: rgba(252, 61, 33, 0.1);
+  border-left-color: var(--ui-danger);
+  background: var(--ui-danger-bg);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -392,7 +417,7 @@ body {
 
 .status-item .value {
   font-weight: bold;
-  color: var(--nasa-white);
+  color: var(--text-bright);
 }
 
 .status-item.warning .label {
@@ -418,17 +443,17 @@ body {
   padding: 0.8rem;
   border: 1px solid var(--app-border-subtle);
   border-radius: 8px;
-  background: var(--app-bg);
-  color: var(--nasa-white);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--text-primary);
   font-size: 1rem;
   transition: all 0.3s ease;
 }
 
 .command-input:focus {
   outline: none;
-  border-color: var(--nasa-blue-light);
+  border-color: rgba(156, 194, 229, 0.45);
   background: var(--app-surface);
-  box-shadow: 0 0 0 2px rgba(11, 61, 145, 0.35);
+  box-shadow: 0 0 0 2px var(--accent-ice-dim);
 }
 
 .command-input::placeholder {
@@ -436,12 +461,12 @@ body {
 }
 
 .error-message {
-  background: rgba(252, 61, 33, 0.12);
-  border: 1px solid var(--nasa-red);
+  background: var(--ui-danger-bg);
+  border: 1px solid rgba(252, 61, 33, 0.45);
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
-  color: var(--nasa-off-white);
+  color: var(--text-secondary);
 }
 
 .error-message p {
@@ -470,54 +495,67 @@ body {
 }
 
 .execute-btn {
-  background: linear-gradient(45deg, var(--nasa-blue-light) 0%, var(--nasa-blue-dark) 100%);
+  background: linear-gradient(165deg, var(--nasa-blue) 0%, var(--nasa-blue-dark) 100%);
   color: var(--nasa-white);
-  box-shadow: inset 0 0 0 1px var(--nasa-blue-light);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 4px 18px rgba(11, 61, 145, 0.4);
+  border: 1px solid rgba(14, 76, 179, 0.85);
 }
 
 .execute-btn:hover {
-  background: linear-gradient(45deg, #1a5fc4 0%, var(--nasa-blue) 100%);
+  background: linear-gradient(165deg, var(--nasa-blue-light) 0%, var(--nasa-blue) 100%);
   transform: translateY(-2px);
+  border-color: rgba(40, 120, 220, 0.95);
   box-shadow:
-    0 4px 14px rgba(11, 61, 145, 0.5),
-    inset 0 0 0 1px var(--nasa-blue-light);
+    0 8px 26px rgba(11, 61, 145, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
+/* Secondary action: cool slate (blue-gray) — related to NASA blue, not a second primary */
 .reset-btn {
-  background: var(--app-bg-lift);
-  color: var(--nasa-off-white);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(175deg, #3d4d62 0%, #2a3342 52%, #232b38 100%);
+  color: var(--text-primary);
+  border: 1px solid rgba(120, 155, 200, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 2px 10px rgba(0, 0, 0, 0.28);
 }
 
 .reset-btn:hover {
-  background: var(--app-surface-hover);
-  border-color: var(--nasa-blue-light);
-  color: var(--nasa-white);
+  background: linear-gradient(175deg, #4d5f78 0%, #38475a 100%);
+  border-color: rgba(150, 185, 225, 0.42);
+  color: var(--text-bright);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(11, 61, 145, 0.35);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 /* Grid Section */
 .grid-section {
   min-width: 0;
   flex: 1 1 0;
-  background: var(--app-surface);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.02) 0%, transparent 45%), var(--app-surface);
   border: 1px solid var(--app-border);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 0.5rem 0.5rem 1rem 0.5rem;
   margin-bottom: 0;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 .grid-section h2 {
-  color: var(--nasa-white);
+  color: var(--text-bright);
   margin-bottom: 0.5rem;
   font-size: 1.5rem;
-  border-bottom: 2px solid var(--nasa-blue-light);
+  border-bottom: 2px solid var(--nasa-red-dim);
   padding-bottom: 0.5rem;
+  font-weight: 650;
 }
 
 .grid-info {
@@ -576,23 +614,39 @@ body {
 }
 
 .grid-cell.rover-here {
-  background: var(--nasa-red) !important;
-  border-color: var(--nasa-red-dark) !important;
-  box-shadow: 0 0 10px var(--nasa-red-glow);
+  background: linear-gradient(
+    165deg,
+    var(--nasa-blue-dark) 0%,
+    var(--nasa-blue) 48%,
+    var(--nasa-blue-light) 100%
+  ) !important;
+  border-color: rgba(14, 76, 179, 0.75) !important;
+  box-shadow:
+    0 0 14px var(--map-rover-halo),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
   position: relative;
   z-index: 1;
   animation: roverMove 0.5s ease-in-out;
 }
 
 .grid-cell.perimeter {
-  background: rgba(11, 61, 145, 0.22);
-  border-color: var(--nasa-blue-light);
+  background: var(--map-perimeter-fill);
+  border-color: var(--map-perimeter-border);
+  box-shadow: inset 0 0 8px var(--map-perimeter-inset);
 }
 
+/* Dual rim: NASA blue (vehicle) + NASA red boundary — hairline only */
 .grid-cell.rover-here.perimeter {
-  background: linear-gradient(45deg, var(--nasa-red) 0%, var(--nasa-red-dark) 100%);
-  border-color: var(--nasa-red-light);
-  box-shadow: 0 0 10px var(--nasa-red-glow);
+  background:
+    linear-gradient(195deg, var(--nasa-blue-dark) 0%, var(--nasa-blue) 42%, #0a1630 100%) padding-box,
+    linear-gradient(118deg, rgba(14, 76, 179, 0.75), rgba(252, 61, 33, 0.38)) border-box !important;
+  border: 1px solid transparent !important;
+  background-clip: padding-box, border-box !important;
+  background-origin: border-box !important;
+  box-shadow:
+    0 0 12px rgba(11, 61, 145, 0.35),
+    0 0 8px rgba(252, 61, 33, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .grid-cell.out-of-bounds {
@@ -617,7 +671,7 @@ body {
 }
 
 .rover-arrow {
-  color: var(--nasa-white);
+  color: var(--text-bright);
   font-size: 12px;
   font-weight: bold;
 }
@@ -653,13 +707,15 @@ body {
 }
 
 .legend-color.rover-here {
-  background: linear-gradient(45deg, var(--nasa-red) 0%, var(--nasa-red-dark) 100%);
-  border-color: var(--nasa-red-dark);
+  background: linear-gradient(165deg, var(--nasa-blue-dark) 0%, var(--nasa-blue-light) 100%);
+  border-color: rgba(14, 76, 179, 0.75);
+  box-shadow: 0 0 8px var(--map-rover-halo);
 }
 
 .legend-color.perimeter {
-  background: rgba(11, 61, 145, 0.22);
-  border-color: var(--nasa-blue-light);
+  background: var(--map-perimeter-fill);
+  border-color: var(--map-perimeter-border);
+  box-shadow: inset 0 0 4px var(--map-perimeter-inset);
 }
 
 .legend-color.out-of-bounds {
@@ -669,19 +725,22 @@ body {
 
 /* History Section */
 .history-section {
-  background: var(--app-surface);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.02) 0%, transparent 45%), var(--app-surface);
   border: 1px solid var(--app-border);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 1.5rem;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
 
 .history-section h2 {
-  color: var(--nasa-white);
+  color: var(--text-bright);
   margin-bottom: 1rem;
   font-size: 1.5rem;
-  border-bottom: 2px solid var(--nasa-blue-light);
+  border-bottom: 2px solid var(--nasa-red-dim);
   padding-bottom: 0.5rem;
+  font-weight: 650;
 }
 
 .history-container {
@@ -706,8 +765,8 @@ body {
   justify-content: space-between;
   align-items: flex-start;
   gap: 1rem 1.25rem;
-  background: var(--app-surface);
-  border-left: 3px solid var(--nasa-blue-light);
+  background: rgba(0, 0, 0, 0.2);
+  border-left: 3px solid #0e4cb3;
   padding: 0.8rem;
   margin-bottom: 0.5rem;
   border-radius: 0 8px 8px 0;
@@ -715,11 +774,11 @@ body {
 }
 
 .history-entry--start {
-  border-left-color: var(--mission-log-start);
+  border-left-color: #34c759;
 }
 
 .history-entry--alert {
-  border-left-color: var(--nasa-red);
+  border-left-color: #fc3d21;
 }
 
 .history-entry__text {
@@ -727,10 +786,11 @@ body {
   min-width: 0;
   text-align: left;
   word-break: break-word;
+  color: var(--text-primary);
 }
 
 .history-entry__mission-start-label {
-  color: var(--mission-log-start);
+  color: #34c759;
 }
 
 .history-entry__time {
@@ -1015,12 +1075,12 @@ body {
 }
 
 .history-container::-webkit-scrollbar-thumb {
-  background: rgba(11, 61, 145, 0.55);
+  background: rgba(156, 194, 229, 0.22);
   border-radius: 4px;
 }
 
 .history-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(11, 61, 145, 0.75);
+  background: rgba(156, 194, 229, 0.35);
 }
 
 /* Animation for rover movement */
@@ -1040,22 +1100,26 @@ body {
   max-width: 420px;
   width: 100%;
   padding: 0.8rem 1.5rem;
-  border: none;
+  border: 1px solid rgba(14, 76, 179, 0.55);
   border-radius: 8px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  background: var(--nasa-blue);
-  color: var(--nasa-white);
+  background: linear-gradient(165deg, var(--nasa-blue) 0%, var(--nasa-blue-dark) 100%);
+  color: var(--text-bright);
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(11, 61, 145, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 4px 16px rgba(11, 61, 145, 0.35);
   margin: 0 auto;
   display: block;
 }
 .return-to-rover-btn:hover {
-  background: var(--nasa-blue-light);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(11, 61, 145, 0.45);
+  background: linear-gradient(165deg, var(--nasa-blue-light) 0%, var(--nasa-blue) 100%);
+  border-color: rgba(20, 100, 200, 0.65);
+  color: var(--nasa-white);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(11, 61, 145, 0.45);
 }
 
 .warning-emoji {

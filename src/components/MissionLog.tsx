@@ -5,7 +5,7 @@ interface MissionLogProps {
   history: MissionLogEntry[];
 }
 
-/** Left-border accent: mission start = green; blocked / shortened path = red; else default blue (see App.css). */
+/** Left-border accent: start = #34c759; alert = #fc3d21; else #0e4cb3 (fixed in App.css). */
 function historyEntryAccentClass(message: string): string {
   if (/^#1:\s*Mission start\b/.test(message)) return 'history-entry--start'
   if (/\bblocked\b/i.test(message)) return 'history-entry--alert'
@@ -30,7 +30,7 @@ function formatMissionLogTimestamp(ms: number): string {
     .toUpperCase();
 }
 
-/** Highlights “Mission start:” in #1 lines using --mission-log-start (see App.css). */
+/** Highlights “Mission start:” in #1 lines using green #34c759 (see App.css). */
 function missionLogMessageContent(message: string): ReactNode {
   const withColon = message.match(/^(#1:\s*)(Mission start:)(.*)$/);
   if (withColon) {
