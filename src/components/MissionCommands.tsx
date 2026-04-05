@@ -1,3 +1,36 @@
+function IconExecute() {
+  return (
+    <svg
+      className="command-btn-icon"
+      viewBox="0 0 24 24"
+      aria-hidden
+      focusable="false"
+    >
+      <path fill="currentColor" d="M8 5v14l11-7-11-7z" />
+    </svg>
+  )
+}
+
+function IconReset() {
+  return (
+    <svg
+      className="command-btn-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+      focusable="false"
+    >
+      <path
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8M21 3v5h-5M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16M3 21v-5h5"
+      />
+    </svg>
+  )
+}
+
 interface MissionCommandsProps {
   commands: string[];
   error: string;
@@ -44,15 +77,15 @@ const MissionCommands: React.FC<MissionCommandsProps> = ({
         </div>
       )}
       <div className="command-buttons">
-        <button onClick={onExecute} className="execute-btn">
+        <button type="button" onClick={onExecute} className="execute-btn">
           <span className="button-content">
-            <span className="execute-emoji">🚀</span>
+            <IconExecute />
             <span>Execute Commands</span>
           </span>
         </button>
-        <button onClick={onReset} className="reset-btn">
+        <button type="button" onClick={onReset} className="reset-btn">
           <span className="button-content">
-            <span className="reset-emoji">🔄</span>
+            <IconReset />
             <span>Reset Rover</span>
           </span>
         </button>
