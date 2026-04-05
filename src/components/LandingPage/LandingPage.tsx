@@ -22,7 +22,7 @@ function readReducedMotion(): boolean {
 /** True for portrait phones and short viewports (e.g. mobile landscape) so 3D + overlay stay coherent. */
 function readNarrowLandingLayout(): boolean {
   return typeof window !== 'undefined'
-    ? window.matchMedia('(max-width: 500px), (max-height: 480px)').matches
+    ? window.matchMedia('(max-width: 500px), (max-height: 520px)').matches
     : false
 }
 
@@ -73,7 +73,7 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
   }, [])
 
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 500px), (max-height: 480px)')
+    const mq = window.matchMedia('(max-width: 500px), (max-height: 520px)')
     setNarrowLayout(mq.matches)
     const onChange = () => setNarrowLayout(mq.matches)
     mq.addEventListener('change', onChange)

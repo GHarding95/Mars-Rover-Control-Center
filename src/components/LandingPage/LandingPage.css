@@ -497,30 +497,51 @@
   }
 }
 
-/* Short viewports: tagline overlaps the centered rocket — hide it. */
-@media (max-height: 560px) {
-  .landing-tagline {
-    display: none;
-  }
-}
-
+/*
+ * Short viewports (≤520px tall): single fluid ramp down to ~150px usable height.
+ * --landing-vh-scale maps 520px → 1 and 150px → ~0.29 so type/spacing track the viewport.
+ * Vertical padding stays visible (not swallowed by scale) via small fixed min + svh.
+ */
 @media (max-height: 520px) {
+  .landing-page {
+    min-height: 100vh;
+    min-height: 100dvh;
+    min-height: 100svh;
+  }
+
   .landing-overlay {
-    --landing-pad: clamp(0.34rem, 1.85vw + 0.62vh, 1.75rem);
-    gap: clamp(0.16rem, 0.58vh + 0.12vw, 0.72rem);
-    justify-content: center;
+    /* 100/520 ≈ 0.192 — linear ramp; clamp floor keeps ~150px viewports usable */
+    --landing-vh-scale: clamp(0.29, 100vh / 520px, 1);
+    --landing-pad-y: max(6px, min(14px, calc(0.12 * max(0px, 100svh - 150px) + 9px)));
+    --landing-pad-x: clamp(0.65rem, 3.2vw + 0.35rem, 1.65rem);
+    --landing-pad: var(--landing-pad-x);
+    gap: calc((0.12rem + 0.35vw + 0.45vh) * var(--landing-vh-scale));
+    justify-content: space-between;
+    padding-top: max(var(--landing-pad-y), env(safe-area-inset-top));
+    padding-bottom: max(var(--landing-pad-y), env(safe-area-inset-bottom));
+    padding-left: max(var(--landing-pad-x), env(safe-area-inset-left));
+    padding-right: max(var(--landing-pad-x), env(safe-area-inset-right));
+    box-sizing: border-box;
+  }
+
+  @supports (height: 100dvh) {
+    .landing-overlay {
+      --landing-vh-scale: clamp(0.29, 100dvh / 520px, 1);
+    }
   }
 
   .landing-header {
-    max-width: min(41rem, 95vw);
+    flex: 0 1 auto;
+    min-height: 0;
+    max-width: min(41rem, 96vw);
   }
 
   .landing-badge {
-    margin: 0 0 clamp(0.26rem, 0.95vh + 0.14rem, 0.7rem);
-    padding: clamp(0.2rem, 0.38vh + 0.14rem, 0.3rem)
-      clamp(0.44rem, 1.12vw + 0.16vh, 0.72rem);
-    font-size: clamp(0.52rem, 0.46vw + 0.52vh, 0.7rem);
-    letter-spacing: 0.18em;
+    margin: 0 0 calc((0.22rem + 0.55vh) * var(--landing-vh-scale));
+    padding: calc((0.17rem + 0.28vh) * var(--landing-vh-scale))
+      calc((0.38rem + 0.9vw) * var(--landing-vh-scale));
+    font-size: max(0.48rem, calc((0.52rem + 0.35vw) * var(--landing-vh-scale)));
+    letter-spacing: calc(0.1em + 0.08em * var(--landing-vh-scale));
   }
 
   .landing-title {
@@ -528,260 +549,135 @@
   }
 
   .landing-title__line {
-    font-size: clamp(1.32rem, 3.35vw + 1.72vh, 2.85rem);
+    font-size: max(
+      0.72rem,
+      min(2.65rem, calc((1.28rem + 2.6vw + 1.35vh) * var(--landing-vh-scale)))
+    );
     text-shadow:
-      0 0 32px rgba(40, 139, 255, 0.33),
-      0 3px 18px rgba(0, 0, 0, 0.78);
+      0 0 calc(20px + 12px * var(--landing-vh-scale)) rgba(40, 139, 255, 0.33),
+      0 2px calc(10px + 8px * var(--landing-vh-scale)) rgba(0, 0, 0, 0.78);
   }
 
   .landing-title__accent {
-    font-size: clamp(1.45rem, 3.75vw + 1.9vh, 3.15rem);
-    filter: drop-shadow(0 0 22px rgba(252, 61, 33, 0.42));
+    font-size: max(
+      0.78rem,
+      min(2.85rem, calc((1.38rem + 2.85vw + 1.48vh) * var(--landing-vh-scale)))
+    );
+    filter: drop-shadow(0 0 calc(14px + 8px * var(--landing-vh-scale)) rgba(252, 61, 33, 0.42));
   }
 
   .landing-tagline {
-    margin: clamp(0.28rem, 0.75vh + 0.2rem, 0.85rem) 0 0;
-    font-size: clamp(0.68rem, 0.68vw + 0.58vh, 0.92rem);
-    line-height: 1.4;
+    margin: calc((0.22rem + 0.5vh) * var(--landing-vh-scale)) 0 0;
+    font-size: max(
+      0.42rem,
+      min(1.05rem, calc((0.52rem + 0.5vw + 0.42vh) * var(--landing-vh-scale)))
+    );
+    line-height: clamp(1.22, calc(1.18 + 0.22 * var(--landing-vh-scale)), 1.5);
   }
 
   .landing-cta {
-    flex: 0 1 auto;
-    min-height: clamp(0rem, 6vh + 0.5rem, 5.5rem);
-    padding: clamp(0.08rem, 0.65vh, 0.45rem) 0;
+    flex: 1 1 auto;
+    min-height: 0;
+    min-height: calc((2rem + 4vh) * var(--landing-vh-scale));
+    padding: calc((0.06rem + 0.45vh) * var(--landing-vh-scale)) 0;
+    align-items: center;
   }
 
   .landing-enter-btn {
-    gap: clamp(0.14rem, 0.42vh + 0.06rem, 0.28rem);
-    padding: clamp(0.4rem, 0.92vw + 0.72vh, 0.88rem) clamp(0.78rem, 3.75vw + 0.38vh, 1.85rem)
-      clamp(0.46rem, 0.98vw + 0.82vh, 1rem);
-    min-width: min(87vw, 18.5rem);
-    border-radius: 3.5px;
+    gap: calc((0.12rem + 0.32vh) * var(--landing-vh-scale));
+    padding: calc((0.34rem + 0.75vw + 0.55vh) * var(--landing-vh-scale))
+      calc((0.72rem + 3.2vw) * var(--landing-vh-scale))
+      calc((0.38rem + 0.8vw + 0.62vh) * var(--landing-vh-scale));
+    min-width: min(92vw, calc(18rem * var(--landing-vh-scale) + 4rem));
+    border-radius: 3px;
     box-shadow:
       0 0 0 1px rgba(255, 255, 255, 0.105),
-      0 5px 20px rgba(11, 61, 145, 0.48),
-      0 14px 34px rgba(0, 0, 0, 0.46);
+      0 4px calc(14px + 6px * var(--landing-vh-scale)) rgba(11, 61, 145, 0.48),
+      0 12px calc(26px + 8px * var(--landing-vh-scale)) rgba(0, 0, 0, 0.46);
   }
 
   .landing-enter-btn__label {
-    font-size: clamp(0.72rem, 0.95vw + 0.52vh, 0.98rem);
-    letter-spacing: clamp(0.06em, 0.1vw + 0.05em, 0.11em);
+    font-size: max(0.58rem, calc((0.72rem + 0.85vw + 0.42vh) * var(--landing-vh-scale)));
+    letter-spacing: clamp(0.04em, 0.06em + 0.04em * var(--landing-vh-scale), 0.11em);
   }
 
   .landing-enter-btn__sub {
-    font-size: clamp(0.52rem, 0.29vw + 0.44vh, 0.72rem);
+    font-size: max(
+      0.4rem,
+      min(0.8rem, calc((0.46rem + 0.2vw + 0.3vh) * var(--landing-vh-scale)))
+    );
+    letter-spacing: clamp(0.04em, 0.06em * var(--landing-vh-scale), 0.08em);
   }
 
   .landing-footer-block {
-    gap: clamp(0.22rem, 0.65vh + 0.1rem, 0.45rem);
-    padding-bottom: max(clamp(0.2rem, 0.75vh, 0.5rem), env(safe-area-inset-bottom));
-  }
-
-  .landing-footer {
-    gap: clamp(0.2rem, 0.55vh, 0.38rem) clamp(0.35rem, 1vw, 0.6rem);
-    font-size: clamp(0.5rem, 0.28vw + 0.48vh, 0.7rem);
-    letter-spacing: 0.12em;
-  }
-
-  .landing-credit {
-    padding: clamp(0.18rem, 0.62vh, 0.45rem) 0 0 0;
-    font-size: clamp(0.5rem, 0.25vw + 0.46vh, 0.65rem);
-  }
-
-  .landing-vignette {
-    box-shadow:
-      inset 0 0 clamp(38px, 7.5vh + 1.4vw, 86px) clamp(13px, 2.6vh + 0.38vw, 28px)
-        rgba(0, 0, 0, 0.705);
-  }
-}
-
-@media (max-height: 460px) {
-  .landing-overlay {
-    --landing-pad: clamp(0.3rem, 1.75vw + 0.55vh, 1.35rem);
-    gap: clamp(0.13rem, 0.45vh + 0.1rem, 0.55rem);
-  }
-
-  .landing-header {
-    max-width: min(40.5rem, 94.5vw);
-  }
-
-  .landing-badge {
-    margin: 0 0 clamp(0.2rem, 0.68vh + 0.1rem, 0.45rem);
-    padding: clamp(0.17rem, 0.32vh + 0.1rem, 0.26rem)
-      clamp(0.4rem, 1vw + 0.14vh, 0.62rem);
-    font-size: clamp(0.5rem, 0.42vw + 0.46vh, 0.66rem);
-    letter-spacing: 0.16em;
-  }
-
-  .landing-title {
-    line-height: 1.01;
-  }
-
-  .landing-title__line {
-    font-size: clamp(1.18rem, 2.85vw + 1.35vh, 2.2rem);
-    text-shadow:
-      0 0 28px rgba(40, 139, 255, 0.31),
-      0 2px 16px rgba(0, 0, 0, 0.765);
-  }
-
-  .landing-title__accent {
-    font-size: clamp(1.28rem, 3.1vw + 1.48vh, 2.35rem);
-    filter: drop-shadow(0 0 19px rgba(252, 61, 33, 0.4));
-  }
-
-  .landing-tagline {
-    margin: clamp(0.2rem, 0.55vh + 0.12rem, 0.45rem) 0 0;
-    font-size: clamp(0.62rem, 0.55vw + 0.46vh, 0.84rem);
-    line-height: 1.34;
-  }
-
-  .landing-cta {
     flex: 0 0 auto;
-    min-height: 0;
-    padding: clamp(0.06rem, 0.45vh, 0.28rem) 0;
-  }
-
-  .landing-enter-btn {
-    gap: clamp(0.12rem, 0.34vh + 0.05rem, 0.22rem);
-    padding: clamp(0.36rem, 0.72vw + 0.62vh, 0.68rem)
-      clamp(0.7rem, 3.35vw + 0.32vh, 1.35rem) clamp(0.4rem, 0.78vw + 0.68vh, 0.58rem);
-    min-width: min(86vw, 16.5rem);
-    border-radius: 3px;
-    box-shadow:
-      0 0 0 1px rgba(255, 255, 255, 0.1),
-      0 4px 16px rgba(11, 61, 145, 0.46),
-      0 12px 28px rgba(0, 0, 0, 0.455);
-  }
-
-  .landing-enter-btn__label {
-    font-size: clamp(0.66rem, 0.82vw + 0.44vh, 0.88rem);
-    letter-spacing: clamp(0.052em, 0.09vw + 0.042em, 0.095em);
-  }
-
-  .landing-enter-btn__sub {
-    font-size: clamp(0.48rem, 0.25vw + 0.36vh, 0.62rem);
-  }
-
-  .landing-footer-block {
-    gap: clamp(0.17rem, 0.48vh, 0.32rem);
-    padding-bottom: max(0.14rem, env(safe-area-inset-bottom));
+    gap: calc((0.16rem + 0.4vh) * var(--landing-vh-scale));
+    padding-bottom: max(calc(0.14rem * var(--landing-vh-scale)), env(safe-area-inset-bottom));
   }
 
   .landing-footer {
-    gap: clamp(0.16rem, 0.48vh, 0.26rem) clamp(0.3rem, 0.9vw, 0.48rem);
-    font-size: clamp(0.47rem, 0.24vw + 0.38vh, 0.62rem);
-    letter-spacing: 0.105em;
+    gap: calc((0.14rem + 0.4vh) * var(--landing-vh-scale))
+      calc((0.28rem + 0.75vw) * var(--landing-vh-scale));
+    font-size: max(0.42rem, calc((0.46rem + 0.22vw + 0.32vh) * var(--landing-vh-scale)));
+    letter-spacing: calc(0.08em + 0.04em * var(--landing-vh-scale));
   }
 
   .landing-footer__dot {
-    width: 3.5px;
-    height: 3.5px;
+    width: calc(3px + 1px * var(--landing-vh-scale));
+    height: calc(3px + 1px * var(--landing-vh-scale));
   }
 
   .landing-credit {
-    padding: clamp(0.12rem, 0.45vh, 0.28rem) 0 0 0;
-    font-size: clamp(0.45rem, 0.22vw + 0.36vh, 0.58rem);
+    padding: calc((0.1rem + 0.4vh) * var(--landing-vh-scale)) 0 0 0;
+    font-size: max(0.4rem, calc((0.44rem + 0.18vw + 0.28vh) * var(--landing-vh-scale)));
   }
 
   .landing-vignette {
     box-shadow:
-      inset 0 0 clamp(32px, 6.5vh + 1.2vw, 64px) clamp(11px, 2.2vh + 0.45vw, 24px)
-        rgba(0, 0, 0, 0.725);
+      inset 0 0 calc(22px + 48px * var(--landing-vh-scale))
+        calc(9px + 14px * var(--landing-vh-scale)) rgba(0, 0, 0, 0.71);
   }
 }
 
-@media (max-height: 400px) {
+/* Mid–ultra-short band: hero copy can sit on the centered rocket — lift the block + add air below the tagline */
+@media (max-height: 280px) and (min-height: 220px) {
   .landing-overlay {
-    --landing-pad: clamp(0.28rem, 1.5vw + 0.35vh, 0.85rem);
-    gap: clamp(0.1rem, 0.35vh + 0.08rem, 0.4rem);
+    gap: calc((0.2rem + 0.45vw + 0.55vh) * var(--landing-vh-scale, 1));
   }
 
   .landing-header {
-    max-width: min(40rem, 94vw);
-  }
-
-  .landing-badge {
-    margin: 0 0 clamp(0.18rem, 0.55vh, 0.35rem);
-    padding: clamp(0.14rem, 0.35vh + 0.06rem, 0.22rem)
-      clamp(0.4rem, 1.1vw + 0.15vh, 0.55rem);
-    font-size: clamp(0.48rem, 0.38vw + 0.42vh, 0.62rem);
-    letter-spacing: 0.14em;
-  }
-
-  .landing-title {
-    line-height: 1;
-  }
-
-  .landing-title__line {
-    font-size: clamp(1rem, 2.35vw + 0.95vh, 1.65rem);
-    text-shadow:
-      0 0 24px rgba(40, 139, 255, 0.3),
-      0 2px 14px rgba(0, 0, 0, 0.75);
-  }
-
-  .landing-title__accent {
-    font-size: clamp(1.08rem, 2.55vw + 1.05vh, 1.8rem);
-    filter: drop-shadow(0 0 16px rgba(252, 61, 33, 0.38));
+    transform: translate3d(0, calc(-0.35rem - 1.2vh), 0);
   }
 
   .landing-tagline {
-    margin: clamp(0.15rem, 0.42vh, 0.35rem) 0 0;
-    font-size: clamp(0.58rem, 0.48vw + 0.42vh, 0.78rem);
-    line-height: 1.32;
+    margin-top: calc((0.26rem + 0.55vh) * var(--landing-vh-scale, 1));
+    padding-bottom: clamp(0.35rem, 1.8vh + 0.2rem, 0.75rem);
+  }
+}
+
+/* Ultra-short: trim chrome further so CTA stays tappable */
+@media (max-height: 220px) {
+  .landing-overlay {
+    --landing-pad-y: max(4px, min(10px, 0.08 * 100svh));
+    gap: calc(0.08rem + 0.25vh);
   }
 
-  .landing-cta {
-    flex: 0 0 auto;
-    min-height: 0;
-    padding: clamp(0.05rem, 0.35vh, 0.2rem) 0;
-  }
-
-  .landing-enter-btn {
-    gap: clamp(0.1rem, 0.28vh, 0.18rem);
-    padding: clamp(0.32rem, 0.65vw + 0.55vh, 0.52rem)
-      clamp(0.65rem, 3.2vw + 0.35vh, 1.1rem)
-      clamp(0.36rem, 0.7vw + 0.58vh, 0.55rem);
-    min-width: min(86vw, 15rem);
-    border-radius: 3px;
-    box-shadow:
-      0 0 0 1px rgba(255, 255, 255, 0.1),
-      0 4px 18px rgba(11, 61, 145, 0.45),
-      0 10px 28px rgba(0, 0, 0, 0.45);
-  }
-
-  .landing-enter-btn__label {
-    font-size: clamp(0.62rem, 0.75vw + 0.38vh, 0.82rem);
-    letter-spacing: clamp(0.05em, 0.08vw + 0.04em, 0.09em);
-  }
-
-  .landing-enter-btn__sub {
-    font-size: clamp(0.45rem, 0.22vw + 0.32vh, 0.55rem);
-  }
-
-  .landing-footer-block {
-    gap: clamp(0.15rem, 0.45vh, 0.28rem);
-    padding-bottom: max(0.12rem, env(safe-area-inset-bottom));
+  .landing-badge {
+    display: none;
   }
 
   .landing-footer {
-    gap: clamp(0.15rem, 0.45vh, 0.22rem) clamp(0.28rem, 0.85vw, 0.45rem);
-    font-size: clamp(0.45rem, 0.22vw + 0.35vh, 0.58rem);
-    letter-spacing: 0.1em;
-  }
-
-  .landing-footer__dot {
-    width: 3px;
-    height: 3px;
+    font-size: max(0.38rem, 0.28rem + 0.6vh);
+    letter-spacing: 0.06em;
   }
 
   .landing-credit {
-    padding: clamp(0.1rem, 0.4vh, 0.22rem) 0 0 0;
-    font-size: clamp(0.42rem, 0.2vw + 0.32vh, 0.52rem);
+    display: none;
   }
+}
 
-  .landing-vignette {
-    box-shadow:
-      inset 0 0 clamp(28px, 6vh + 1.5vw, 56px) clamp(10px, 2vh + 0.5vw, 22px)
-        rgba(0, 0, 0, 0.74);
+@media (max-height: 170px) {
+  .landing-footer-block {
+    gap: 0.1rem;
   }
 }
