@@ -21,8 +21,31 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
   const gridViewCenterRef = useRef(gridViewCenter);
   const [, setDraggingState] = useState(false); // for re-render
   const gridContainerRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  /** Measured CSS cell size so pan sensitivity matches responsive grid-cell dimensions. */
+  const cellSizePx = useRef(25);
 
   gridViewCenterRef.current = gridViewCenter;
+
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const measure = () => {
+      const cell = grid.querySelector('.grid-cell');
+      if (cell instanceof HTMLElement) {
+        const w = cell.getBoundingClientRect().width;
+        if (w > 0) cellSizePx.current = w;
+      }
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(grid);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [gridViewSize]);
 
   // Calculate rover's actual position
   const roverRow = Math.floor((roverPosition - 1) / 100) + 1;
@@ -53,7 +76,7 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
     e.preventDefault();
     const dx = e.clientX - lastPos.current.x;
     const dy = e.clientY - lastPos.current.y;
-    const cellSize = 25;
+    const cellSize = Math.max(1, cellSizePx.current);
     if (Math.abs(dx) >= cellSize || Math.abs(dy) >= cellSize) {
       const dCol = -Math.round(dx / cellSize);
       const dRow = -Math.round(dy / cellSize);
@@ -86,7 +109,7 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
       const center = gridViewCenterRef.current;
       const dx = e.touches[0].clientX - lastPos.current.x;
       const dy = e.touches[0].clientY - lastPos.current.y;
-      const cellSize = 25;
+      const cellSize = Math.max(1, cellSizePx.current);
       if (Math.abs(dx) >= cellSize || Math.abs(dy) >= cellSize) {
         const dCol = -Math.round(dx / cellSize);
         const dRow = -Math.round(dy / cellSize);
@@ -174,6 +197,7 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
         // onMouseEnter/onMouseLeave handled by event listeners; touch uses native listeners (see useEffect)
       >
         <div
+          ref={gridRef}
           className="grid"
           style={{ cursor: dragging.current ? 'grabbing' : 'grab', gridTemplateColumns: `repeat(${gridViewSize}, 1fr)` }}
         >
