@@ -23,12 +23,12 @@
   display: block;
 }
 
-/* Fades out to reveal the WebGL scene (content appears to fade in from black). */
+/* Fades out to match canvas clear color — avoids a visible black flash over #050810. */
 .landing-webgl-fade {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: #000;
+  background: #050810;
   pointer-events: none;
   opacity: 1;
   will-change: opacity;

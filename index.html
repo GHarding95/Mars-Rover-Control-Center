@@ -15,6 +15,17 @@
       content="Mars Rover Control Center: This is a fully mobile responsive React + TypeScript app where you can command a virtual Mars Rover across a 100x100 meter grid, change direction using an interactive compass, track the Rover status, send up to 5 commands at once, browse a draggable grid & review commands in the Mission Log."
     />
     <title>Mars Rover Challenge</title>
+    <!-- Match landing canvas (#050810) before JS/CSS bundles parse — avoids gray/white first paint. -->
+    <style>
+      html {
+        color-scheme: dark;
+      }
+      html,
+      body,
+      #root {
+        background-color: #050810;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

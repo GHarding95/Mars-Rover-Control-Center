@@ -62,7 +62,8 @@ html, body {
 
 body {
   font-family: var(--font-sans);
-  background: var(--app-bg);
+  /* Page chrome matches landing first paint; mission shell fills viewport via .app */
+  background: #050810;
   color: var(--text-primary);
   min-height: 100vh;
   width: 100%;
@@ -74,6 +75,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
+  background: var(--app-bg);
 }
 
 /* Header — night bridge: blends into canvas; NASA red hairline */

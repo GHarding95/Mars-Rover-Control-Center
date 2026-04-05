@@ -27,8 +27,8 @@ export type LandingCanvasProps = {
 }
 
 /**
- * WebGL subtree — black layer fades out once the scene commits so the 3D view
- * appears to fade in smoothly (does not cover the UI overlay above the stack).
+ * WebGL subtree — solid layer matching the canvas clear color fades out once the
+ * scene commits so the 3D view appears smoothly (does not cover the UI overlay).
  */
 export default function LandingCanvas({
   liteGraphics,
