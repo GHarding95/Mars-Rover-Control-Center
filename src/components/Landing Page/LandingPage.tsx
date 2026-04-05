@@ -114,17 +114,22 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
             onClick={onEnter}
           >
             <span className="landing-enter-btn__label">Enter Mission Control</span>
-            <span className="landing-enter-btn__sub">Press to initialize console</span>
+            <span className="landing-enter-btn__sub">Press to initialise console</span>
           </button>
         </div>
 
-        <footer className="landing-footer">
-          <span className="landing-footer__item">Rover Simulation</span>
-          <span className="landing-footer__dot" aria-hidden="true" />
-          <span className="landing-footer__item">100×100 grid</span>
-          <span className="landing-footer__dot" aria-hidden="true" />
-          <span className="landing-footer__item">Portfolio demo</span>
-        </footer>
+        <div className="landing-footer-block">
+          <footer className="landing-footer">
+            <span className="landing-footer__item">Rover Simulation</span>
+            <span className="landing-footer__dot" aria-hidden="true" />
+            <span className="landing-footer__item">100×100 grid</span>
+            <span className="landing-footer__dot" aria-hidden="true" />
+            <span className="landing-footer__item">Portfolio demo</span>
+          </footer>
+          <p className="landing-credit">
+            © {new Date().getFullYear()} Glen Harding
+          </p>
+        </div>
       </div>
     </div>
   )

@@ -250,6 +250,15 @@
   color: rgba(255, 255, 255, 0.85);
 }
 
+.landing-footer-block {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
 .landing-footer {
   position: relative;
   z-index: 1;
@@ -270,6 +279,18 @@
   border-radius: 50%;
   background: var(--nasa-red, #fc3d21);
   opacity: 0.6;
+}
+
+.landing-credit {
+  position: relative;
+  z-index: 1;
+  margin: 0.85rem 0 0;
+  padding: 0;
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--nasa-white, #fff);
 }
 
 @media (max-width: 500px) {
@@ -299,5 +320,9 @@
 
   .landing-footer {
     font-size: 0.8rem;
+  }
+
+  .landing-credit {
+    font-size: 0.72rem;
   }
 }
