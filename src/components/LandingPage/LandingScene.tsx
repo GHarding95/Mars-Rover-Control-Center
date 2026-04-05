@@ -424,6 +424,15 @@ function OrbitingRock({
   yOffset,
   color,
   reducedMotion,
+  radiusX,
+  radiusZ,
+  orbitYaw = 0,
+  xzFreqX = 1,
+  xzFreqZ = 1,
+  verticalAmp = 0.22,
+  verticalFreq = 1.2,
+  verticalAmp2 = 0,
+  verticalFreq2 = 1,
 }: {
   radius: number
   speed: number
@@ -431,16 +440,36 @@ function OrbitingRock({
   yOffset: number
   color: string
   reducedMotion: boolean
+  /** Defaults to `radius` when omitted. */
+  radiusX?: number
+  radiusZ?: number
+  /** Rotate the orbit in the horizontal plane (radians). */
+  orbitYaw?: number
+  /** `t` multipliers for horizontal motion; unequal values yield Lissajous-style paths. */
+  xzFreqX?: number
+  xzFreqZ?: number
+  verticalAmp?: number
+  verticalFreq?: number
+  verticalAmp2?: number
+  verticalFreq2?: number
 }) {
   const ref = useRef<THREE.Group>(null)
+  const rX = radiusX ?? radius
+  const rZ = radiusZ ?? radius
   useFrame((state) => {
     if (!ref.current) return
     const t = reducedMotion ? phase : state.clock.elapsedTime * speed + phase
-    ref.current.position.set(
-      Math.cos(t) * radius,
-      yOffset + Math.sin(t * 1.2) * 0.22,
-      Math.sin(t) * radius
-    )
+    const x0 = Math.cos(t * xzFreqX) * rX
+    const z0 = Math.sin(t * xzFreqZ) * rZ
+    const cy = Math.cos(orbitYaw)
+    const sy = Math.sin(orbitYaw)
+    const x = cy * x0 - sy * z0
+    const z = sy * x0 + cy * z0
+    const y =
+      yOffset +
+      Math.sin(t * verticalFreq) * verticalAmp +
+      (verticalAmp2 !== 0 ? Math.sin(t * verticalFreq2) * verticalAmp2 : 0)
+    ref.current.position.set(x, y, z)
   })
 
   return (
@@ -508,18 +537,97 @@ export function LandingScene({
 
       <OrbitingRock
         radius={5.2}
+        radiusX={5.65}
+        radiusZ={4.75}
         speed={0.16}
         phase={0}
         yOffset={1.05}
+        orbitYaw={0.38}
+        verticalAmp={0.26}
+        verticalFreq={1.05}
+        verticalAmp2={0.11}
+        verticalFreq2={2.25}
         color="#6a564c"
         reducedMotion={motionOff}
       />
       <OrbitingRock
         radius={6.4}
+        radiusX={6.05}
+        radiusZ={6.95}
         speed={-0.13}
         phase={2.1}
         yOffset={-0.35}
+        orbitYaw={-0.58}
+        xzFreqX={1}
+        xzFreqZ={1.42}
+        verticalAmp={0.2}
+        verticalFreq={1.48}
         color="#554840"
+        reducedMotion={motionOff}
+      />
+      <OrbitingRock
+        radius={4.6}
+        radiusX={4.35}
+        radiusZ={5.15}
+        speed={0.11}
+        phase={4.2}
+        yOffset={0.45}
+        orbitYaw={0.95}
+        xzFreqZ={2.05}
+        verticalAmp={0.34}
+        verticalFreq={0.92}
+        verticalAmp2={0.08}
+        verticalFreq2={3.1}
+        color="#5c4a42"
+        reducedMotion={motionOff}
+      />
+      <OrbitingRock
+        radius={7.0}
+        radiusX={7.35}
+        radiusZ={6.35}
+        speed={-0.09}
+        phase={1.35}
+        yOffset={1.35}
+        orbitYaw={1.15}
+        xzFreqX={1.18}
+        xzFreqZ={0.88}
+        verticalAmp={0.24}
+        verticalFreq={1.62}
+        color="#4a3d36"
+        reducedMotion={motionOff}
+      />
+      <OrbitingRock
+        radius={5.85}
+        radiusX={6.25}
+        radiusZ={5.35}
+        speed={0.19}
+        phase={5.0}
+        yOffset={-0.92}
+        orbitYaw={-0.82}
+        xzFreqX={1}
+        xzFreqZ={1.58}
+        verticalAmp={0.3}
+        verticalFreq={1.75}
+        verticalAmp2={0.14}
+        verticalFreq2={1.1}
+        color="#635045"
+        reducedMotion={motionOff}
+      />
+      <OrbitingRock
+        radius={7.35}
+        radiusX={6.75}
+        radiusZ={8.05}
+        speed={0.075}
+        phase={3.65}
+        yOffset={0.12}
+        orbitYaw={0.48}
+        xzFreqX={0.82}
+        xzFreqZ={1.22}
+        verticalAmp={0.18}
+        verticalFreq={2.05}
+        verticalAmp2={0.1}
+        verticalFreq2={2.9}
+        color="#483c34"
         reducedMotion={motionOff}
       />
 
