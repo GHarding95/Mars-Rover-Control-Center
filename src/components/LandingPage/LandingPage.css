@@ -97,7 +97,16 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: clamp(1.25rem, 4vw, 2.5rem);
+  /* vw + vh: scales down smoothly in short / landscape viewports (no hard breakpoint jump). */
+  --landing-pad: clamp(0.5rem, 2.8vw + 1.1vh, 2.5rem);
+  gap: clamp(0.25rem, 0.9vh + 0.2vw, 1rem);
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-top: max(var(--landing-pad), env(safe-area-inset-top));
+  padding-right: max(var(--landing-pad), env(safe-area-inset-right));
+  padding-bottom: max(var(--landing-pad), env(safe-area-inset-bottom));
+  padding-left: max(var(--landing-pad), env(safe-area-inset-left));
   pointer-events: none;
 }
 
@@ -122,7 +131,9 @@
 .landing-vignette {
   position: absolute;
   inset: 0;
-  box-shadow: inset 0 0 120px 40px rgba(0, 0, 0, 0.65);
+  box-shadow:
+    inset 0 0 clamp(52px, 10vh + 2vw, 120px) clamp(18px, 3.5vh + 0.5vw, 40px)
+      rgba(0, 0, 0, 0.65);
   pointer-events: none;
   z-index: 0;
 }
@@ -136,9 +147,9 @@
 
 .landing-badge {
   display: inline-block;
-  margin: 0 0 1rem;
-  padding: 0.35rem 0.9rem;
-  font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+  margin: 0 0 clamp(0.4rem, 1.5vh + 0.2rem, 1rem);
+  padding: clamp(0.26rem, 0.5vh + 0.2rem, 0.35rem) clamp(0.55rem, 1.5vw + 0.2vh, 0.9rem);
+  font-size: clamp(0.58rem, 0.55vw + 0.65vh, 0.75rem);
   font-weight: 600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -159,7 +170,7 @@
 
 .landing-title__line {
   display: block;
-  font-size: clamp(2.1rem, 8vw, 4rem);
+  font-size: clamp(1.65rem, 4.5vw + 2.4vh, 4rem);
   color: var(--nasa-white, #fff);
   text-shadow:
     0 0 40px rgba(40, 139, 255, 0.35),
@@ -169,7 +180,7 @@
 
 .landing-title__accent {
   display: block;
-  font-size: clamp(2.4rem, 9vw, 4.6rem);
+  font-size: clamp(1.85rem, 5.1vw + 2.65vh, 4.6rem);
   background: linear-gradient(
     135deg,
     var(--nasa-red-light, #ff6a56) 0%,
@@ -212,8 +223,8 @@
 }
 
 .landing-tagline {
-  margin: 1.25rem 0 0;
-  font-size: clamp(0.9rem, 2.1vw, 1.05rem);
+  margin: clamp(0.45rem, 1.1vh + 0.35rem, 1.25rem) 0 0;
+  font-size: clamp(0.78rem, 0.85vw + 0.75vh, 1.05rem);
   font-weight: 500;
   color: var(--nasa-muted, #9ca8bc);
   line-height: 1.55;
@@ -223,11 +234,12 @@
 .landing-cta {
   position: relative;
   z-index: 1;
-  flex: 1;
+  flex: 1 1 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 8rem;
+  min-height: clamp(2.5rem, 11vh + 1.5rem, 8rem);
+  padding: clamp(0.15rem, 1vh, 0.75rem) 0;
 }
 
 .landing-enter-btn {
@@ -235,8 +247,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.35rem;
-  padding: 1.15rem 2.5rem 1.25rem;
+  gap: clamp(0.2rem, 0.6vh + 0.1rem, 0.35rem);
+  padding: clamp(0.55rem, 1.1vw + 1vh, 1.15rem) clamp(1rem, 5vw + 0.5vh, 2.5rem)
+    clamp(0.6rem, 1.15vw + 1.05vh, 1.25rem);
   min-width: min(90vw, 22rem);
   cursor: pointer;
   font-family: inherit;
@@ -280,15 +293,15 @@
 
 .landing-enter-btn__label {
   position: relative;
-  font-size: clamp(1rem, 2.5vw, 1.15rem);
+  font-size: clamp(0.85rem, 1.15vw + 0.7vh, 1.15rem);
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: clamp(0.07em, 0.12vw + 0.06em, 0.12em);
   text-transform: uppercase;
 }
 
 .landing-enter-btn__sub {
   position: relative;
-  font-size: 0.72rem;
+  font-size: clamp(0.58rem, 0.35vw + 0.55vh, 0.8rem);
   font-weight: 500;
   letter-spacing: 0.08em;
   opacity: 0.75;
@@ -302,8 +315,8 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  gap: 0.65rem;
-  padding-bottom: 0.65rem;
+  gap: clamp(0.35rem, 1vh + 0.15rem, 0.65rem);
+  padding-bottom: max(clamp(0.3rem, 1vh, 0.65rem), env(safe-area-inset-bottom));
 }
 
 .landing-footer {
@@ -313,8 +326,8 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem 0.75rem;
-  font-size: 0.72rem;
+  gap: clamp(0.35rem, 0.8vh, 0.5rem) clamp(0.45rem, 1.2vw, 0.75rem);
+  font-size: clamp(0.58rem, 0.35vw + 0.6vh, 0.8rem);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: rgba(156, 168, 188, 0.65);
@@ -332,44 +345,443 @@
   position: relative;
   z-index: 1;
   margin: 0;
-  padding: 10px 0 0 0;
+  padding: clamp(0.25rem, 0.8vh, 10px) 0 0 0;
   text-align: center;
-  font-size: 0.68rem;
+  font-size: clamp(0.58rem, 0.3vw + 0.55vh, 0.72rem);
   font-weight: 500;
   letter-spacing: 0.06em;
   color: var(--nasa-white, #fff);
 }
 
-@media (max-width: 500px) {
+/*
+ * Short-height ramp: several stacked max-height queries (largest first).
+ * Shorter viewports match more rules; later blocks override earlier ones so size steps stay small.
+ */
+
+@media (max-height: 680px) {
+  .landing-overlay {
+    --landing-pad: clamp(0.46rem, 2.65vw + 1.02vh, 2.35rem);
+    gap: clamp(0.22rem, 0.82vh + 0.18vw, 0.95rem);
+  }
+
   .landing-badge {
-    font-size: clamp(0.72rem, 1.65vw, 0.82rem);
+    margin: 0 0 clamp(0.36rem, 1.38vh + 0.2rem, 0.95rem);
+    padding: clamp(0.24rem, 0.46vh + 0.18rem, 0.34rem)
+      clamp(0.52rem, 1.42vw + 0.2vh, 0.86rem);
+    font-size: clamp(0.56rem, 0.53vw + 0.63vh, 0.745rem);
   }
 
   .landing-title__line {
-    font-size: clamp(2.35rem, 8.5vw, 4rem);
+    font-size: clamp(1.58rem, 4.35vw + 2.32vh, 3.9rem);
   }
 
   .landing-title__accent {
-    font-size: clamp(2.65rem, 9.5vw, 4.6rem);
+    font-size: clamp(1.78rem, 4.95vw + 2.58vh, 4.45rem);
   }
 
   .landing-tagline {
-    font-size: clamp(1rem, 2.35vw, 1.12rem);
+    margin: clamp(0.42rem, 1.05vh + 0.34rem, 1.2rem) 0 0;
+    font-size: clamp(0.76rem, 0.82vw + 0.72vh, 1.04rem);
+  }
+
+  .landing-cta {
+    min-height: clamp(2.35rem, 10.5vh + 1.35rem, 7.75rem);
+    padding: clamp(0.14rem, 0.92vh, 0.7rem) 0;
+  }
+
+  .landing-enter-btn {
+    gap: clamp(0.19rem, 0.54vh + 0.09rem, 0.34rem);
+    padding: clamp(0.5rem, 1.05vw + 0.92vh, 1.1rem) clamp(0.95rem, 4.75vw + 0.48vh, 2.4rem)
+      clamp(0.55rem, 1.12vw + 1vh, 1.2rem);
+    min-width: min(89vw, 21.5rem);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.115),
+      0 7px 28px rgba(11, 61, 145, 0.52),
+      0 18px 44px rgba(0, 0, 0, 0.48);
   }
 
   .landing-enter-btn__label {
-    font-size: clamp(1.08rem, 2.7vw, 1.22rem);
+    font-size: clamp(0.82rem, 1.12vw + 0.66vh, 1.13rem);
   }
 
   .landing-enter-btn__sub {
-    font-size: 0.8rem;
+    font-size: clamp(0.57rem, 0.34vw + 0.54vh, 0.78rem);
+  }
+
+  .landing-footer-block {
+    gap: clamp(0.32rem, 0.95vh + 0.14rem, 0.62rem);
   }
 
   .landing-footer {
-    font-size: 0.8rem;
+    font-size: clamp(0.56rem, 0.34vw + 0.58vh, 0.78rem);
   }
 
   .landing-credit {
-    font-size: 0.72rem;
+    font-size: clamp(0.56rem, 0.29vw + 0.54vh, 0.7rem);
+  }
+
+  .landing-vignette {
+    box-shadow:
+      inset 0 0 clamp(48px, 9.2vh + 1.8vw, 112px) clamp(16px, 3.2vh + 0.45vw, 36px)
+        rgba(0, 0, 0, 0.66);
+  }
+}
+
+@media (max-height: 600px) {
+  .landing-overlay {
+    --landing-pad: clamp(0.4rem, 2.35vw + 0.88vh, 2.05rem);
+    gap: clamp(0.2rem, 0.72vh + 0.16vw, 0.85rem);
+  }
+
+  .landing-badge {
+    margin: 0 0 clamp(0.32rem, 1.2vh + 0.18rem, 0.85rem);
+    padding: clamp(0.22rem, 0.42vh + 0.16rem, 0.32rem)
+      clamp(0.48rem, 1.28vw + 0.18vh, 0.8rem);
+    font-size: clamp(0.54rem, 0.5vw + 0.58vh, 0.72rem);
+  }
+
+  .landing-title__line {
+    font-size: clamp(1.48rem, 3.95vw + 2.08vh, 3.45rem);
+  }
+
+  .landing-title__accent {
+    font-size: clamp(1.65rem, 4.45vw + 2.32vh, 3.95rem);
+  }
+
+  .landing-tagline {
+    margin: clamp(0.38rem, 0.95vh + 0.3rem, 1.05rem) 0 0;
+    font-size: clamp(0.74rem, 0.78vw + 0.68vh, 1rem);
+    line-height: 1.48;
+  }
+
+  .landing-cta {
+    min-height: clamp(2.1rem, 9.5vh + 1.15rem, 7rem);
+    padding: clamp(0.12rem, 0.82vh, 0.6rem) 0;
+  }
+
+  .landing-enter-btn {
+    gap: clamp(0.17rem, 0.5vh + 0.08rem, 0.32rem);
+    padding: clamp(0.46rem, 1vw + 0.85vh, 1.02rem) clamp(0.88rem, 4.35vw + 0.42vh, 2.2rem)
+      clamp(0.52rem, 1.08vw + 0.92vh, 1.12rem);
+    min-width: min(88vw, 20.5rem);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.11),
+      0 6px 24px rgba(11, 61, 145, 0.5),
+      0 16px 40px rgba(0, 0, 0, 0.47);
+  }
+
+  .landing-enter-btn__label {
+    font-size: clamp(0.78rem, 1.06vw + 0.62vh, 1.08rem);
+  }
+
+  .landing-enter-btn__sub {
+    font-size: clamp(0.55rem, 0.32vw + 0.5vh, 0.76rem);
+  }
+
+  .landing-footer-block {
+    gap: clamp(0.28rem, 0.85vh + 0.12rem, 0.55rem);
+  }
+
+  .landing-footer {
+    font-size: clamp(0.54rem, 0.32vw + 0.55vh, 0.76rem);
+  }
+
+  .landing-credit {
+    font-size: clamp(0.54rem, 0.27vw + 0.51vh, 0.68rem);
+  }
+
+  .landing-vignette {
+    box-shadow:
+      inset 0 0 clamp(44px, 8.5vh + 1.6vw, 100px) clamp(15px, 3vh + 0.42vw, 34px)
+        rgba(0, 0, 0, 0.675);
+  }
+}
+
+/* Short viewports: tagline overlaps the centered rocket — hide it. */
+@media (max-height: 560px) {
+  .landing-tagline {
+    display: none;
+  }
+}
+
+@media (max-height: 520px) {
+  .landing-overlay {
+    --landing-pad: clamp(0.34rem, 1.85vw + 0.62vh, 1.75rem);
+    gap: clamp(0.16rem, 0.58vh + 0.12vw, 0.72rem);
+    justify-content: center;
+  }
+
+  .landing-header {
+    max-width: min(41rem, 95vw);
+  }
+
+  .landing-badge {
+    margin: 0 0 clamp(0.26rem, 0.95vh + 0.14rem, 0.7rem);
+    padding: clamp(0.2rem, 0.38vh + 0.14rem, 0.3rem)
+      clamp(0.44rem, 1.12vw + 0.16vh, 0.72rem);
+    font-size: clamp(0.52rem, 0.46vw + 0.52vh, 0.7rem);
+    letter-spacing: 0.18em;
+  }
+
+  .landing-title {
+    line-height: 1.02;
+  }
+
+  .landing-title__line {
+    font-size: clamp(1.32rem, 3.35vw + 1.72vh, 2.85rem);
+    text-shadow:
+      0 0 32px rgba(40, 139, 255, 0.33),
+      0 3px 18px rgba(0, 0, 0, 0.78);
+  }
+
+  .landing-title__accent {
+    font-size: clamp(1.45rem, 3.75vw + 1.9vh, 3.15rem);
+    filter: drop-shadow(0 0 22px rgba(252, 61, 33, 0.42));
+  }
+
+  .landing-tagline {
+    margin: clamp(0.28rem, 0.75vh + 0.2rem, 0.85rem) 0 0;
+    font-size: clamp(0.68rem, 0.68vw + 0.58vh, 0.92rem);
+    line-height: 1.4;
+  }
+
+  .landing-cta {
+    flex: 0 1 auto;
+    min-height: clamp(0rem, 6vh + 0.5rem, 5.5rem);
+    padding: clamp(0.08rem, 0.65vh, 0.45rem) 0;
+  }
+
+  .landing-enter-btn {
+    gap: clamp(0.14rem, 0.42vh + 0.06rem, 0.28rem);
+    padding: clamp(0.4rem, 0.92vw + 0.72vh, 0.88rem) clamp(0.78rem, 3.75vw + 0.38vh, 1.85rem)
+      clamp(0.46rem, 0.98vw + 0.82vh, 1rem);
+    min-width: min(87vw, 18.5rem);
+    border-radius: 3.5px;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.105),
+      0 5px 20px rgba(11, 61, 145, 0.48),
+      0 14px 34px rgba(0, 0, 0, 0.46);
+  }
+
+  .landing-enter-btn__label {
+    font-size: clamp(0.72rem, 0.95vw + 0.52vh, 0.98rem);
+    letter-spacing: clamp(0.06em, 0.1vw + 0.05em, 0.11em);
+  }
+
+  .landing-enter-btn__sub {
+    font-size: clamp(0.52rem, 0.29vw + 0.44vh, 0.72rem);
+  }
+
+  .landing-footer-block {
+    gap: clamp(0.22rem, 0.65vh + 0.1rem, 0.45rem);
+    padding-bottom: max(clamp(0.2rem, 0.75vh, 0.5rem), env(safe-area-inset-bottom));
+  }
+
+  .landing-footer {
+    gap: clamp(0.2rem, 0.55vh, 0.38rem) clamp(0.35rem, 1vw, 0.6rem);
+    font-size: clamp(0.5rem, 0.28vw + 0.48vh, 0.7rem);
+    letter-spacing: 0.12em;
+  }
+
+  .landing-credit {
+    padding: clamp(0.18rem, 0.62vh, 0.45rem) 0 0 0;
+    font-size: clamp(0.5rem, 0.25vw + 0.46vh, 0.65rem);
+  }
+
+  .landing-vignette {
+    box-shadow:
+      inset 0 0 clamp(38px, 7.5vh + 1.4vw, 86px) clamp(13px, 2.6vh + 0.38vw, 28px)
+        rgba(0, 0, 0, 0.705);
+  }
+}
+
+@media (max-height: 460px) {
+  .landing-overlay {
+    --landing-pad: clamp(0.3rem, 1.75vw + 0.55vh, 1.35rem);
+    gap: clamp(0.13rem, 0.45vh + 0.1rem, 0.55rem);
+  }
+
+  .landing-header {
+    max-width: min(40.5rem, 94.5vw);
+  }
+
+  .landing-badge {
+    margin: 0 0 clamp(0.2rem, 0.68vh + 0.1rem, 0.45rem);
+    padding: clamp(0.17rem, 0.32vh + 0.1rem, 0.26rem)
+      clamp(0.4rem, 1vw + 0.14vh, 0.62rem);
+    font-size: clamp(0.5rem, 0.42vw + 0.46vh, 0.66rem);
+    letter-spacing: 0.16em;
+  }
+
+  .landing-title {
+    line-height: 1.01;
+  }
+
+  .landing-title__line {
+    font-size: clamp(1.18rem, 2.85vw + 1.35vh, 2.2rem);
+    text-shadow:
+      0 0 28px rgba(40, 139, 255, 0.31),
+      0 2px 16px rgba(0, 0, 0, 0.765);
+  }
+
+  .landing-title__accent {
+    font-size: clamp(1.28rem, 3.1vw + 1.48vh, 2.35rem);
+    filter: drop-shadow(0 0 19px rgba(252, 61, 33, 0.4));
+  }
+
+  .landing-tagline {
+    margin: clamp(0.2rem, 0.55vh + 0.12rem, 0.45rem) 0 0;
+    font-size: clamp(0.62rem, 0.55vw + 0.46vh, 0.84rem);
+    line-height: 1.34;
+  }
+
+  .landing-cta {
+    flex: 0 0 auto;
+    min-height: 0;
+    padding: clamp(0.06rem, 0.45vh, 0.28rem) 0;
+  }
+
+  .landing-enter-btn {
+    gap: clamp(0.12rem, 0.34vh + 0.05rem, 0.22rem);
+    padding: clamp(0.36rem, 0.72vw + 0.62vh, 0.68rem)
+      clamp(0.7rem, 3.35vw + 0.32vh, 1.35rem) clamp(0.4rem, 0.78vw + 0.68vh, 0.58rem);
+    min-width: min(86vw, 16.5rem);
+    border-radius: 3px;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      0 4px 16px rgba(11, 61, 145, 0.46),
+      0 12px 28px rgba(0, 0, 0, 0.455);
+  }
+
+  .landing-enter-btn__label {
+    font-size: clamp(0.66rem, 0.82vw + 0.44vh, 0.88rem);
+    letter-spacing: clamp(0.052em, 0.09vw + 0.042em, 0.095em);
+  }
+
+  .landing-enter-btn__sub {
+    font-size: clamp(0.48rem, 0.25vw + 0.36vh, 0.62rem);
+  }
+
+  .landing-footer-block {
+    gap: clamp(0.17rem, 0.48vh, 0.32rem);
+    padding-bottom: max(0.14rem, env(safe-area-inset-bottom));
+  }
+
+  .landing-footer {
+    gap: clamp(0.16rem, 0.48vh, 0.26rem) clamp(0.3rem, 0.9vw, 0.48rem);
+    font-size: clamp(0.47rem, 0.24vw + 0.38vh, 0.62rem);
+    letter-spacing: 0.105em;
+  }
+
+  .landing-footer__dot {
+    width: 3.5px;
+    height: 3.5px;
+  }
+
+  .landing-credit {
+    padding: clamp(0.12rem, 0.45vh, 0.28rem) 0 0 0;
+    font-size: clamp(0.45rem, 0.22vw + 0.36vh, 0.58rem);
+  }
+
+  .landing-vignette {
+    box-shadow:
+      inset 0 0 clamp(32px, 6.5vh + 1.2vw, 64px) clamp(11px, 2.2vh + 0.45vw, 24px)
+        rgba(0, 0, 0, 0.725);
+  }
+}
+
+@media (max-height: 400px) {
+  .landing-overlay {
+    --landing-pad: clamp(0.28rem, 1.5vw + 0.35vh, 0.85rem);
+    gap: clamp(0.1rem, 0.35vh + 0.08rem, 0.4rem);
+  }
+
+  .landing-header {
+    max-width: min(40rem, 94vw);
+  }
+
+  .landing-badge {
+    margin: 0 0 clamp(0.18rem, 0.55vh, 0.35rem);
+    padding: clamp(0.14rem, 0.35vh + 0.06rem, 0.22rem)
+      clamp(0.4rem, 1.1vw + 0.15vh, 0.55rem);
+    font-size: clamp(0.48rem, 0.38vw + 0.42vh, 0.62rem);
+    letter-spacing: 0.14em;
+  }
+
+  .landing-title {
+    line-height: 1;
+  }
+
+  .landing-title__line {
+    font-size: clamp(1rem, 2.35vw + 0.95vh, 1.65rem);
+    text-shadow:
+      0 0 24px rgba(40, 139, 255, 0.3),
+      0 2px 14px rgba(0, 0, 0, 0.75);
+  }
+
+  .landing-title__accent {
+    font-size: clamp(1.08rem, 2.55vw + 1.05vh, 1.8rem);
+    filter: drop-shadow(0 0 16px rgba(252, 61, 33, 0.38));
+  }
+
+  .landing-tagline {
+    margin: clamp(0.15rem, 0.42vh, 0.35rem) 0 0;
+    font-size: clamp(0.58rem, 0.48vw + 0.42vh, 0.78rem);
+    line-height: 1.32;
+  }
+
+  .landing-cta {
+    flex: 0 0 auto;
+    min-height: 0;
+    padding: clamp(0.05rem, 0.35vh, 0.2rem) 0;
+  }
+
+  .landing-enter-btn {
+    gap: clamp(0.1rem, 0.28vh, 0.18rem);
+    padding: clamp(0.32rem, 0.65vw + 0.55vh, 0.52rem)
+      clamp(0.65rem, 3.2vw + 0.35vh, 1.1rem)
+      clamp(0.36rem, 0.7vw + 0.58vh, 0.55rem);
+    min-width: min(86vw, 15rem);
+    border-radius: 3px;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      0 4px 18px rgba(11, 61, 145, 0.45),
+      0 10px 28px rgba(0, 0, 0, 0.45);
+  }
+
+  .landing-enter-btn__label {
+    font-size: clamp(0.62rem, 0.75vw + 0.38vh, 0.82rem);
+    letter-spacing: clamp(0.05em, 0.08vw + 0.04em, 0.09em);
+  }
+
+  .landing-enter-btn__sub {
+    font-size: clamp(0.45rem, 0.22vw + 0.32vh, 0.55rem);
+  }
+
+  .landing-footer-block {
+    gap: clamp(0.15rem, 0.45vh, 0.28rem);
+    padding-bottom: max(0.12rem, env(safe-area-inset-bottom));
+  }
+
+  .landing-footer {
+    gap: clamp(0.15rem, 0.45vh, 0.22rem) clamp(0.28rem, 0.85vw, 0.45rem);
+    font-size: clamp(0.45rem, 0.22vw + 0.35vh, 0.58rem);
+    letter-spacing: 0.1em;
+  }
+
+  .landing-footer__dot {
+    width: 3px;
+    height: 3px;
+  }
+
+  .landing-credit {
+    padding: clamp(0.1rem, 0.4vh, 0.22rem) 0 0 0;
+    font-size: clamp(0.42rem, 0.2vw + 0.32vh, 0.52rem);
+  }
+
+  .landing-vignette {
+    box-shadow:
+      inset 0 0 clamp(28px, 6vh + 1.5vw, 56px) clamp(10px, 2vh + 0.5vw, 22px)
+        rgba(0, 0, 0, 0.74);
   }
 }
