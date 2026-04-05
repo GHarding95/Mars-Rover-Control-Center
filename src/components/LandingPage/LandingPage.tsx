@@ -4,7 +4,6 @@ import {
   useEffect,
   useState,
 } from 'react'
-import { getLandingPerfProfile, shouldSkipHeavyWebGL } from './landingPerf'
 import './LandingPage.css'
 
 const LandingCanvas = lazy(() => import('./LandingCanvas'))
@@ -26,9 +25,8 @@ function readNarrowLandingLayout(): boolean {
 }
 
 export default function LandingPage({ onEnter }: LandingPageProps) {
-  const [perfProfile] = useState(() => getLandingPerfProfile())
-  const [skipWebGLForNetwork] = useState(() => shouldSkipHeavyWebGL())
-  const liteGraphics = perfProfile === 'lite'
+  const liteGraphics = false
+  const skipWebGLForNetwork = false
   const [reducedMotion, setReducedMotion] = useState(() => readReducedMotion())
   const [narrowLayout, setNarrowLayout] = useState(() => readNarrowLandingLayout())
   /** Load WebGL only after main thread is idle — keeps first paint off the three/fiber critical path. */

@@ -1,4 +1,5 @@
 /* Full-screen intro — NASA palette matches App.css */
+/* Plus Jakarta Sans: readable at small sizes, strong display weights for the hero */
 
 .landing-page {
   position: fixed;
@@ -6,6 +7,13 @@
   z-index: 10000;
   overflow: hidden;
   background: #050810;
+  font-family:
+    'Plus Jakarta Sans',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  font-optical-sizing: auto;
 }
 
 .landing-webgl-stack {
@@ -96,7 +104,7 @@
   padding: 0.35rem 0.9rem;
   font-size: clamp(0.65rem, 1.5vw, 0.75rem);
   font-weight: 600;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--nasa-muted, #9ca8bc);
   border: 1px solid rgba(11, 61, 145, 0.45);
@@ -109,7 +117,7 @@
   margin: 0;
   font-weight: 800;
   line-height: 1.05;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
   text-transform: uppercase;
 }
 
@@ -156,7 +164,7 @@
   }
 }
 
-/* Lite WebGL profile: drop compositor-heavy CSS on weak GPUs (see landingPerf.ts). */
+/* Lite WebGL profile: drop compositor-heavy CSS when .landing-page--lite is applied. */
 .landing-page--lite .landing-title__line,
 .landing-page--lite .landing-title__accent {
   animation: none;
@@ -170,6 +178,7 @@
 .landing-tagline {
   margin: 1.25rem 0 0;
   font-size: clamp(0.9rem, 2.1vw, 1.05rem);
+  font-weight: 500;
   color: var(--nasa-muted, #9ca8bc);
   line-height: 1.55;
   text-wrap: balance;
