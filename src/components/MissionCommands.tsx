@@ -57,7 +57,7 @@ const MissionCommands: React.FC<MissionCommandsProps> = ({
   return (
     <div className="command-section">
       <h2>Mission Commands</h2>
-      <p className="command-help">Enter up to 5 commands (e.g., "50m", "East", "25m", "South", "4m")</p>
+      <p className="command-help">Enter up to 5 commands (e.g. "50m", "East", "25m", "South", "4m")</p>
       <form
         className="command-inputs"
         autoComplete="off"
@@ -78,6 +78,7 @@ const MissionCommands: React.FC<MissionCommandsProps> = ({
             autoCapitalize="none"
             autoCorrect="off"
             spellCheck={false}
+            maxLength={5}
           />
         ))}
       </form>
