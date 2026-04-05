@@ -19,7 +19,7 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
   const dragging = useRef(false);
   const lastPos = useRef<{ x: number; y: number } | null>(null);
   const gridViewCenterRef = useRef(gridViewCenter);
-  const [, setDraggingState] = useState(false); // for re-render
+  const [isDragging, setDraggingState] = useState(false); // for re-render + grab cursor
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   /** Measured CSS cell size so pan sensitivity matches responsive grid-cell dimensions. */
@@ -198,8 +198,8 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
       >
         <div
           ref={gridRef}
-          className="grid"
-          style={{ cursor: dragging.current ? 'grabbing' : 'grab', gridTemplateColumns: `repeat(${gridViewSize}, 1fr)` }}
+          className={`grid${isDragging ? ' grid--dragging' : ''}`}
+          style={{ gridTemplateColumns: `repeat(${gridViewSize}, 1fr)` }}
         >
           {Array.from({ length: gridViewSize }, (_, rowIndex) => (
             <div key={rowIndex} className="grid-row">

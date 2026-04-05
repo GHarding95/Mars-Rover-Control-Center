@@ -631,6 +631,11 @@ body {
   max-width: none;
   margin: 0 auto;
   user-select: none;
+  cursor: grab;
+}
+
+.grid--dragging {
+  cursor: grabbing;
 }
 
 .grid-row {
@@ -649,7 +654,7 @@ body {
   justify-content: center;
   position: relative;
   transition: all 0.3s ease;
-  cursor: pointer;
+  cursor: inherit;
   min-width: 32px;
   min-height: 32px;
 }
@@ -718,11 +723,19 @@ body {
 }
 
 .square-number {
-  font-size: 12px;
+  font-size: 9px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
   color: rgba(255, 255, 255, 0.7);
   position: absolute;
-  bottom: 2px;
-  right: 2px;
+  bottom: 1px;
+  right: 1px;
+  left: 1px;
+  text-align: right;
+  pointer-events: none;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .grid-legend {
@@ -890,7 +903,7 @@ body {
     width: 20px;
     height: 20px;
   }
-  /* .square-number font-size intentionally not changed here to keep it consistent */
+  /* .square-number stays 9px from base rule */
 }
 
 @media (max-width: 1600px) {
@@ -1049,10 +1062,6 @@ body {
     height: 15px;
   }
   
-  .square-number {
-    font-size: 12px;
-  }
-  
   .rover-arrow {
     font-size: 8px;
   }
@@ -1089,10 +1098,6 @@ body {
   .grid-cell {
     width: 12px;
     height: 12px;
-  }
-  
-  .square-number {
-    font-size: 12px;
   }
   
   .rover-arrow {
