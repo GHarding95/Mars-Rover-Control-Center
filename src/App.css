@@ -415,9 +415,24 @@ body {
 .status-item.warning {
   border-left-color: var(--ui-danger);
   background: var(--ui-danger-bg);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
+.status-item.warning .label,
 .status-item.warning .value {
-  text-align: right;
+  text-align: center;
+  white-space: nowrap;
+  word-break: normal;
+  overflow-wrap: normal;
+  flex-shrink: 0;
 }
 
 .status-item .label {
@@ -946,9 +961,24 @@ body {
   .status-item {
     grid-template-columns: 1fr;
   }
-  .status-item .value,
-  .status-item.warning .value {
+  .status-item .value {
     text-align: left;
+  }
+}
+
+@media (max-width: 299px) {
+  .status-item.warning {
+    flex-direction: column;
+    flex-wrap: wrap;
+    white-space: normal;
+    overflow-x: visible;
+  }
+  .status-item.warning .label,
+  .status-item.warning .value {
+    white-space: normal;
+    flex-shrink: 1;
+    word-break: break-word;
+    overflow-wrap: break-word;
   }
 }
 

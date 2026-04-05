@@ -23,7 +23,7 @@ const RoverStatus: React.FC<RoverStatusProps> = ({ position, direction, isAtPeri
       </div>
       {isAtPerimeter && (
         <div className="status-item warning">
-          <span className="label"><span className="warning-emoji">⚠️</span> Status:</span>
+          <span className="label"><span className="warning-emoji">⚠️</span></span>
           <span className="value">PERIMETER REACHED</span>
         </div>
       )}

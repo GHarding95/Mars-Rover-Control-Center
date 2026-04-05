@@ -16,10 +16,26 @@
   font-optical-sizing: auto;
 }
 
-.landing-webgl-stack {
+/* Wraps black base + canvas so the viewport is never #050810 before the veil exists. */
+.landing-webgl-shell {
   position: absolute;
   inset: 0;
   z-index: 0;
+  pointer-events: none;
+}
+
+.landing-webgl-black-base {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #000000;
+}
+
+.landing-webgl-stack {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #000000;
 }
 
 .landing-canvas {
@@ -31,25 +47,45 @@
   display: block;
 }
 
-/* Fades out to match canvas clear color — avoids a visible black flash over #050810. */
-.landing-webgl-fade {
+/* Full-screen black over hero + WebGL until GPU ready; above .landing-overlay (z-index 1). */
+.landing-boot-veil {
+  --landing-boot-fade-duration: 1.75s;
+  /* Long, soft ease-out — most movement early, velvet finish at the end */
+  --landing-boot-fade-ease: cubic-bezier(0.22, 1, 0.62, 1);
+
   position: absolute;
   inset: 0;
-  z-index: 1;
-  background: #050810;
-  pointer-events: none;
+  z-index: 2;
+  pointer-events: auto;
   opacity: 1;
   will-change: opacity;
-  transition: opacity 1.05s cubic-bezier(0.22, 1, 0.36, 1);
+  background: #000000;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  transition:
+    opacity var(--landing-boot-fade-duration) var(--landing-boot-fade-ease),
+    visibility 0s linear;
 }
 
-.landing-webgl-fade--out {
+.landing-boot-veil--out {
   opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity var(--landing-boot-fade-duration) var(--landing-boot-fade-ease),
+    visibility 0s linear var(--landing-boot-fade-duration);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .landing-webgl-fade {
-    transition: opacity 0.2s ease-out;
+  .landing-boot-veil {
+    --landing-boot-fade-duration: 0.4s;
+    --landing-boot-fade-ease: ease-out;
+  }
+
+  .landing-boot-veil--out {
+    transition:
+      opacity var(--landing-boot-fade-duration) var(--landing-boot-fade-ease),
+      visibility 0s linear var(--landing-boot-fade-duration);
   }
 }
 

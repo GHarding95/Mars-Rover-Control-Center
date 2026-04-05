@@ -1,6 +1,7 @@
 import {
   lazy,
   Suspense,
+  useCallback,
   useEffect,
   useState,
 } from 'react'
@@ -31,6 +32,13 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
   const [narrowLayout, setNarrowLayout] = useState(() => readNarrowLandingLayout())
   /** Load WebGL only after main thread is idle — keeps first paint off the three/fiber critical path. */
   const [canvasReady, setCanvasReady] = useState(false)
+  /** Full-screen black veil until WebGL first frame; then fades out over the whole landing UI. */
+  const [bootRevealAllowed, setBootRevealAllowed] = useState(false)
+  const [bootVeilGone, setBootVeilGone] = useState(false)
+
+  const onBootReady = useCallback(() => {
+    setBootRevealAllowed(true)
+  }, [])
 
   useEffect(() => {
     if (reducedMotion || skipWebGLForNetwork) {
@@ -71,6 +79,13 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
     return () => mq.removeEventListener('change', onChange)
   }, [])
 
+  useEffect(() => {
+    if (reducedMotion || !canvasReady || bootVeilGone) return
+    if (bootRevealAllowed) return
+    const id = window.setTimeout(() => setBootRevealAllowed(true), 20_000)
+    return () => window.clearTimeout(id)
+  }, [reducedMotion, canvasReady, bootVeilGone, bootRevealAllowed])
+
   return (
     <div
       className={
@@ -80,15 +95,21 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
       aria-modal="true"
       aria-labelledby="landing-title"
       aria-describedby="landing-desc"
+      aria-busy={!reducedMotion && !bootVeilGone}
     >
       {!reducedMotion && canvasReady && (
-        <Suspense fallback={null}>
-          <LandingCanvas
-            liteGraphics={liteGraphics}
-            reducedMotion={reducedMotion}
-            narrowLayout={narrowLayout}
-          />
-        </Suspense>
+        <div className="landing-webgl-shell">
+          {/* Solid black under WebGL: shows instantly while the lazy canvas chunk loads (Suspense null). */}
+          <div className="landing-webgl-black-base" aria-hidden="true" />
+          <Suspense fallback={null}>
+            <LandingCanvas
+              liteGraphics={liteGraphics}
+              reducedMotion={reducedMotion}
+              narrowLayout={narrowLayout}
+              onBootReady={onBootReady}
+            />
+          </Suspense>
+        </div>
       )}
 
       <div className="landing-overlay">
@@ -130,6 +151,22 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
           </p>
         </div>
       </div>
+
+      {!reducedMotion && !bootVeilGone && (
+        <div
+          className={
+            bootRevealAllowed
+              ? 'landing-boot-veil landing-boot-veil--out'
+              : 'landing-boot-veil'
+          }
+          aria-hidden="true"
+          onTransitionEnd={(e) => {
+            if (e.target !== e.currentTarget) return
+            if (e.propertyName !== 'opacity') return
+            if (bootRevealAllowed) setBootVeilGone(true)
+          }}
+        />
+      )}
     </div>
   )
 }

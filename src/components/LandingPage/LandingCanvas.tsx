@@ -2,21 +2,35 @@ import {
   lazy,
   Suspense,
   useCallback,
-  useEffect,
+  useLayoutEffect,
   useRef,
-  useState,
 } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 
 /** Code-split 3D scene: heavy three work loads in a separate chunk from the R3F shell. */
 const LandingScene = lazy(() =>
   import('./LandingScene').then((m) => ({ default: m.LandingScene }))
 )
 
-function SceneReadyNotifier({ onReady }: { onReady: () => void }) {
-  useEffect(() => {
-    onReady()
-  }, [onReady])
+/** Fires after shader compile + first drawn frame so the overlay does not lift on a blank/hitching WebGL surface. */
+function FirstPaintReady({ onReady }: { onReady: () => void }) {
+  const { gl, scene, camera } = useThree()
+  const compiled = useRef(false)
+  const fired = useRef(false)
+
+  useLayoutEffect(() => {
+    if (compiled.current) return
+    compiled.current = true
+    gl.compile(scene, camera)
+  }, [gl, scene, camera])
+
+  useFrame(() => {
+    if (fired.current) return
+    fired.current = true
+    requestAnimationFrame(() => {
+      onReady()
+    })
+  })
   return null
 }
 
@@ -24,32 +38,26 @@ export type LandingCanvasProps = {
   liteGraphics: boolean
   reducedMotion: boolean
   narrowLayout: boolean
+  /** Called once when the GPU has compiled and the first frame is ready; parent lifts the full-screen boot veil. */
+  onBootReady?: () => void
 }
 
 /**
- * WebGL subtree — solid layer matching the canvas clear color fades out once the
- * scene commits so the 3D view appears smoothly (does not cover the UI overlay).
+ * WebGL subtree — parent owns a full-screen black veil until `onBootReady` fires.
  */
+
 export default function LandingCanvas({
   liteGraphics,
   reducedMotion,
   narrowLayout,
+  onBootReady,
 }: LandingCanvasProps) {
-  const [sceneReady, setSceneReady] = useState(false)
-  const [fadeLayerGone, setFadeLayerGone] = useState(false)
-
-  const announcedRef = useRef(false)
-  const announceReady = useCallback(() => {
-    if (announcedRef.current) return
-    announcedRef.current = true
-    setSceneReady(true)
-  }, [])
-
-  useEffect(() => {
-    if (sceneReady) return
-    const id = window.setTimeout(() => announceReady(), 20_000)
-    return () => window.clearTimeout(id)
-  }, [sceneReady, announceReady])
+  const readyRef = useRef(false)
+  const signalReady = useCallback(() => {
+    if (readyRef.current) return
+    readyRef.current = true
+    onBootReady?.()
+  }, [onBootReady])
 
   return (
     <div className="landing-webgl-stack">
@@ -74,25 +82,9 @@ export default function LandingCanvas({
             narrowLayout={narrowLayout}
             liteGraphics={liteGraphics}
           />
-          <SceneReadyNotifier onReady={announceReady} />
+          <FirstPaintReady onReady={signalReady} />
         </Suspense>
       </Canvas>
-
-      {!reducedMotion && !fadeLayerGone && (
-        <div
-          className={
-            sceneReady
-              ? 'landing-webgl-fade landing-webgl-fade--out'
-              : 'landing-webgl-fade'
-          }
-          aria-hidden="true"
-          onTransitionEnd={(e) => {
-            if (e.target !== e.currentTarget) return
-            if (e.propertyName !== 'opacity') return
-            if (sceneReady) setFadeLayerGone(true)
-          }}
-        />
-      )}
     </div>
   )
 }
