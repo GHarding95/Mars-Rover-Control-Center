@@ -88,8 +88,8 @@ function buildStarLayers(
   let idx = 0
 
   const layerCounts = weights.map((w) => Math.max(8, Math.floor(total * w)))
-  let sum = layerCounts.reduce((a, b) => a + b, 0)
-  let fix = total - sum
+  const sum = layerCounts.reduce((a, b) => a + b, 0)
+  const fix = total - sum
   layerCounts[layerCounts.length - 1] += fix
 
   for (let L = 0; L < radii.length; L++) {

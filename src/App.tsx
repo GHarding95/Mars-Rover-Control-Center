@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import './App.css';
 import type { Direction, GridCell, MissionLogEntry, RoverState } from './missionTypes'
+import LandingPage from './components/LandingPage/LandingPage'
 
 export type { Direction, MissionLogEntry } from './missionTypes'
 
-const LandingPage = lazy(() => import('./components/Landing Page/LandingPage'))
 const MissionControl = lazy(() => import('./MissionControl'))
 const LazyAnalytics = lazy(() =>
   import('./components/LazyAnalytics').then((m) => ({ default: m.LazyAnalytics }))
@@ -537,11 +537,7 @@ function App() {
   if (showLanding) {
     return (
       <>
-        <Suspense
-          fallback={<div className="landing-suspense-fallback" role="presentation" aria-hidden />}
-        >
-          <LandingPage onEnter={enterMission} />
-        </Suspense>
+        <LandingPage onEnter={enterMission} />
         <Suspense fallback={null}>
           <LazyAnalytics />
         </Suspense>

@@ -19,7 +19,7 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
   const dragging = useRef(false);
   const lastPos = useRef<{ x: number; y: number } | null>(null);
   const gridViewCenterRef = useRef(gridViewCenter);
-  const [_, setDraggingState] = useState(false); // for re-render
+  const [, setDraggingState] = useState(false); // for re-render
   const gridContainerRef = useRef<HTMLDivElement>(null);
 
   gridViewCenterRef.current = gridViewCenter;
@@ -124,16 +124,17 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
   useEffect(() => {
     const gridEl = gridContainerRef.current;
     if (!gridEl) return;
-    let preventScroll = (e: Event) => {
+    const preventScroll = (e: Event) => {
       e.preventDefault();
     };
+    const scrollBlockOpts: AddEventListenerOptions = { passive: false };
     const enable = () => {
-      window.addEventListener('wheel', preventScroll, { passive: false } as any);
-      window.addEventListener('touchmove', preventScroll, { passive: false } as any);
+      window.addEventListener('wheel', preventScroll, scrollBlockOpts);
+      window.addEventListener('touchmove', preventScroll, scrollBlockOpts);
     };
     const disable = () => {
-      window.removeEventListener('wheel', preventScroll, { passive: false } as any);
-      window.removeEventListener('touchmove', preventScroll, { passive: false } as any);
+      window.removeEventListener('wheel', preventScroll, scrollBlockOpts);
+      window.removeEventListener('touchmove', preventScroll, scrollBlockOpts);
     };
     gridEl.addEventListener('mouseenter', enable);
     gridEl.addEventListener('mouseleave', disable);

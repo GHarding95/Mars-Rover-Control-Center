@@ -1138,14 +1138,7 @@ body {
   width: 100%;
 }
 
-/* Lazy-route fallbacks (styles live here so they apply before chunk CSS loads) */
-.landing-suspense-fallback {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  background: #050810;
-}
-
+/* Lazy-route fallback (styles live here so they apply before chunk CSS loads) */
 .mission-control-fallback {
   min-height: 100vh;
   display: flex;
