@@ -155,7 +155,7 @@ export function RealisticStarfield({
   const matRef = useRef<ShaderMaterial>(null)
 
   /* Lower counts = faster init + lighter GPU vs old 8k / 2.8k / 900. */
-  const count = liteGraphics ? 350 : reducedMotion ? 900 : 2200
+  const count = liteGraphics ? 520 : reducedMotion ? 1100 : 2800
   const twinkleOff = reducedMotion || liteGraphics
   const stillStars = reducedMotion || liteGraphics
 
