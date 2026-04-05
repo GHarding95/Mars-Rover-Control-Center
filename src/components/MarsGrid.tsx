@@ -53,7 +53,7 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
     e.preventDefault();
     const dx = e.clientX - lastPos.current.x;
     const dy = e.clientY - lastPos.current.y;
-    const cellSize = 38;
+    const cellSize = 25;
     if (Math.abs(dx) >= cellSize || Math.abs(dy) >= cellSize) {
       const dCol = -Math.round(dx / cellSize);
       const dRow = -Math.round(dy / cellSize);
@@ -86,7 +86,7 @@ const MarsGrid: React.FC<MarsGridProps> = ({ grid, roverPosition, gridViewCenter
       const center = gridViewCenterRef.current;
       const dx = e.touches[0].clientX - lastPos.current.x;
       const dy = e.touches[0].clientY - lastPos.current.y;
-      const cellSize = 38;
+      const cellSize = 25;
       if (Math.abs(dx) >= cellSize || Math.abs(dy) >= cellSize) {
         const dCol = -Math.round(dx / cellSize);
         const dRow = -Math.round(dy / cellSize);
