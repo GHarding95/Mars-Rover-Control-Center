@@ -52,11 +52,13 @@ body {
   overflow-x: hidden;
 }
 
-/* Header — NASA blue bar */
+/* Header — NASA blue bar (grid: title | timer | Mars) */
 .app-header {
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
+  gap: clamp(0.75rem, 2vw, 1.25rem);
   min-height: 9rem;
   background: linear-gradient(
     180deg,
@@ -71,20 +73,21 @@ body {
 .app-logo {
   position: relative;
   z-index: 1;
+  grid-column: 1;
+  justify-self: start;
   max-width: min(100%, 42%);
-  display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-rows: auto auto;
-  align-items: center;
-  column-gap: 0.5rem;
-  row-gap: 0.5rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 0.5rem;
 }
 
 .app-header-timer {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  grid-column: 2;
+  justify-self: center;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -92,6 +95,24 @@ body {
   line-height: 1.3;
   pointer-events: none;
   padding: 0.75rem 0;
+}
+
+.app-header-mars {
+  grid-column: 3;
+  justify-self: end;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.app-header-mars__img {
+  width: clamp(3.25rem, min(14vw, 18vh), 7rem);
+  height: clamp(3.25rem, min(14vw, 18vh), 7rem);
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.35));
 }
 
 .app-header-timer__title {
@@ -178,60 +199,23 @@ body {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
-/* Centered timer overlaps the logo on mid-width viewports — tuck it to the right. */
 @media (max-width: 1350px) {
-  .app-header {
-    justify-content: space-between;
-    gap: 1rem;
-  }
-
   .app-logo {
-    max-width: min(48%, 22rem);
-    flex-shrink: 1;
-    min-width: 0;
-  }
-
-  .app-header-timer {
-    position: static;
-    transform: none;
-    margin-left: auto;
-    align-items: flex-end;
-    text-align: right;
-    padding: 0.75rem 0;
-  }
-
-  .app-header-timer__title {
-    padding: 0 0 0.75rem;
-  }
-
-  .app-header-timer__datetime {
-    padding: 0;
+    max-width: min(100%, 22rem);
   }
 }
 
 .app-logo h1 {
-  grid-column: 2;
-  grid-row: 1;
   margin: 0;
-  font-size: 2.5rem;
+  /* Higher floor + gentler vw so mobile stays readable (nowrap needs room). */
+  font-size: clamp(1.5rem, 0.82rem + 1.85vw, 2.5rem);
   font-weight: bold;
   color: var(--nasa-white);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
-}
-
-.app-logo-mars {
-  grid-column: 1;
-  grid-row: 1;
-  width: 2.5rem;
-  height: 2.5rem;
-  object-fit: contain;
-  align-self: center;
-  transform: translateY(0.08em);
+  white-space: nowrap;
 }
 
 .app-logo p {
-  grid-column: 1 / -1;
-  grid-row: 2;
   margin: 0;
   font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.88);
@@ -862,21 +846,25 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    align-items: center;
+    /* stretch so Rover Status + Compass match grid/command full width (center would shrink to content) */
+    align-items: stretch;
     padding-left: 8px;
     padding-right: 8px;
     box-sizing: border-box;
   }
+  .dashboard-left-column {
+    width: 100%;
+    align-self: stretch;
+  }
   .rover-status, .command-section, .grid-section, .direction-compass {
     padding: 1rem;
   }
-  .grid-container, .grid {
-    /* no max-width, already handled */
-  }
 }
 
-@media (max-width: 768px) {
+/* Header stacks below this width; logo, timer, and Mars centered as one column. */
+@media (max-width: 1180px) {
   .app-header {
+    display: flex;
     flex-direction: column;
     align-items: center;
     min-height: unset;
@@ -884,13 +872,17 @@ body {
   }
 
   .app-logo {
+    grid-column: auto;
     max-width: 100%;
+    width: 100%;
     text-align: center;
+    align-items: center;
+    align-self: stretch;
   }
 
   .app-header-timer {
+    grid-column: auto;
     position: static;
-    transform: none;
     align-self: center;
     width: 100%;
     align-items: center;
@@ -898,24 +890,36 @@ body {
   }
 
   .app-header-timer__title {
-    padding: 0 0.5rem 0.75rem;
+    padding: 0 0 0.75rem;
+    text-align: center;
   }
 
   .app-header-timer__datetime {
-    padding: 0 0.5rem;
+    padding: 0;
+    text-align: center;
   }
 
+  .app-header-timer__elapsed-grid {
+    justify-items: center;
+  }
+
+  .app-header-mars {
+    grid-column: auto;
+    width: 100%;
+    justify-content: center;
+    padding-top: 0.25rem;
+  }
+
+  .app-header-mars__img {
+    width: clamp(3rem, 28vw, 5rem);
+    height: clamp(3rem, 28vw, 5rem);
+    max-height: none;
+  }
+}
+
+@media (max-width: 768px) {
   .app-main {
     padding: 1rem;
-  }
-  
-  .app-logo h1 {
-    font-size: 2rem;
-  }
-
-  .app-logo-mars {
-    width: 2rem;
-    height: 2rem;
   }
   
   .grid-cell {
@@ -947,18 +951,9 @@ body {
 }
 
 @media (max-width: 410px) {
-  .app-logo {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 0.5rem;
-  }
-
-  .app-logo-mars {
-    transform: none;
-    width: 2.75rem;
-    height: 2.75rem;
+  .app-header-mars__img {
+    width: clamp(3.25rem, 36vw, 4.5rem);
+    height: clamp(3.25rem, 36vw, 4.5rem);
   }
 }
 
