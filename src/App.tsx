@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
-import { Analytics } from "@vercel/analytics/react";
 import './App.css';
 import type { Direction, GridCell, MissionLogEntry, RoverState } from './missionTypes'
 
@@ -7,6 +6,9 @@ export type { Direction, MissionLogEntry } from './missionTypes'
 
 const LandingPage = lazy(() => import('./components/Landing Page/LandingPage'))
 const MissionControl = lazy(() => import('./MissionControl'))
+const LazyAnalytics = lazy(() =>
+  import('./components/LazyAnalytics').then((m) => ({ default: m.LazyAnalytics }))
+)
 
 const MISSION_START_LOG_RE = /^#1: Mission start/
 
@@ -540,7 +542,9 @@ function App() {
         >
           <LandingPage onEnter={enterMission} />
         </Suspense>
-        <Analytics />
+        <Suspense fallback={null}>
+          <LazyAnalytics />
+        </Suspense>
       </>
     )
   }
@@ -575,7 +579,9 @@ function App() {
           resetRover={resetRover}
         />
       </Suspense>
-      <Analytics />
+      <Suspense fallback={null}>
+        <LazyAnalytics />
+      </Suspense>
     </>
   )
 }

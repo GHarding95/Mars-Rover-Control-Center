@@ -1,11 +1,13 @@
-import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
-import { Canvas } from '@react-three/fiber'
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useState,
+} from 'react'
+import { getLandingPerfProfile } from './landingPerf'
 import './LandingPage.css'
 
-/** Code-split 3D scene so it downloads while the welcome overlay is up. */
-const LandingScene = lazy(() =>
-  import('./LandingScene').then((m) => ({ default: m.LandingScene }))
-)
+const LandingCanvas = lazy(() => import('./LandingCanvas'))
 
 type LandingPageProps = {
   onEnter: () => void
@@ -23,36 +25,41 @@ function readNarrowLandingLayout(): boolean {
     : false
 }
 
-/** Fires once the Suspense boundary above has committed (scene + async drei assets like Environment). */
-function SceneReadyNotifier({ onReady }: { onReady: () => void }) {
-  useEffect(() => {
-    onReady()
-  }, [onReady])
-  return null
-}
-
 export default function LandingPage({ onEnter }: LandingPageProps) {
+  const [perfProfile] = useState(() => getLandingPerfProfile())
+  const liteGraphics = perfProfile === 'lite'
   const [reducedMotion, setReducedMotion] = useState(() => readReducedMotion())
   const [narrowLayout, setNarrowLayout] = useState(() => readNarrowLandingLayout())
-  const [showWelcomeBoot, setShowWelcomeBoot] = useState(() => !readReducedMotion())
-  const [bootExiting, setBootExiting] = useState(false)
-  /** WebGL + scene assets committed; canvas is shown when true (still behind boot until exit). */
-  const [sceneReady, setSceneReady] = useState(false)
+  /** Load WebGL only after main thread is idle — keeps first paint off the three/fiber critical path. */
+  const [canvasReady, setCanvasReady] = useState(false)
 
-  const handleSceneReady = useCallback(() => {
-    setSceneReady(true)
-    setBootExiting(true)
-  }, [])
+  useEffect(() => {
+    if (reducedMotion) {
+      setCanvasReady(false)
+      return
+    }
+    let cancelled = false
+    const run = () => {
+      if (!cancelled) setCanvasReady(true)
+    }
+    if (typeof requestIdleCallback !== 'undefined') {
+      const id = requestIdleCallback(run, { timeout: 2500 })
+      return () => {
+        cancelled = true
+        cancelIdleCallback(id)
+      }
+    }
+    const tid = window.setTimeout(run, 1)
+    return () => {
+      cancelled = true
+      window.clearTimeout(tid)
+    }
+  }, [reducedMotion])
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
     setReducedMotion(mq.matches)
-    if (mq.matches) setShowWelcomeBoot(false)
-    const onChange = () => {
-      const m = mq.matches
-      setReducedMotion(m)
-      if (m) setShowWelcomeBoot(false)
-    }
+    const onChange = () => setReducedMotion(mq.matches)
     mq.addEventListener('change', onChange)
     return () => mq.removeEventListener('change', onChange)
   }, [])
@@ -65,54 +72,24 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
     return () => mq.removeEventListener('change', onChange)
   }, [])
 
-  /** If loading stalls, avoid blocking the UI forever. */
-  useEffect(() => {
-    if (!showWelcomeBoot || bootExiting) return
-    const fallbackMs = 20_000
-    const id = window.setTimeout(() => {
-      setSceneReady(true)
-      setBootExiting(true)
-    }, fallbackMs)
-    return () => window.clearTimeout(id)
-  }, [showWelcomeBoot, bootExiting])
-
   return (
     <div
-      className="landing-page"
+      className={
+        liteGraphics ? 'landing-page landing-page--lite' : 'landing-page'
+      }
       role="dialog"
       aria-modal="true"
       aria-labelledby="landing-title"
       aria-describedby="landing-desc"
     >
-      <Canvas
-        className={
-          sceneReady ? 'landing-canvas' : 'landing-canvas landing-canvas--concealed'
-        }
-        shadows="percentage"
-        camera={{ position: [0, 2.85, 12.5], fov: 45, near: 0.1, far: 200 }}
-        gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
-        dpr={[1, 2]}
-      >
-        <color attach="background" args={['#050810']} />
-        <fog attach="fog" args={['#050810', 18, 55]} />
+      {!reducedMotion && canvasReady && (
         <Suspense fallback={null}>
-          <LandingScene reducedMotion={reducedMotion} narrowLayout={narrowLayout} />
-          <SceneReadyNotifier onReady={handleSceneReady} />
+          <LandingCanvas
+            liteGraphics={liteGraphics}
+            reducedMotion={reducedMotion}
+            narrowLayout={narrowLayout}
+          />
         </Suspense>
-      </Canvas>
-
-      {showWelcomeBoot && (
-        <div
-          className={bootExiting ? 'landing-boot landing-boot--exit' : 'landing-boot'}
-          aria-hidden="true"
-          onAnimationEnd={(e) => {
-            if (e.target !== e.currentTarget) return
-            if (e.animationName !== 'landing-boot-fadeout') return
-            setShowWelcomeBoot(false)
-          }}
-        >
-          <p className="landing-boot__welcome">Welcome</p>
-        </div>
       )}
 
       <div className="landing-overlay">

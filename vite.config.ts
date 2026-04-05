@@ -4,9 +4,15 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  esbuild: {
+    legalComments: 'none',
+  },
   build: {
-    // three.js minified is ~700kB+; splitting @react-three/* keeps r3f/drei in a separate cached chunk
+    // three.js minified is ~700kB+; split so landing can cache R3F / core separately
     chunkSizeWarningLimit: 800,
+    target: 'es2022',
+    minify: 'esbuild',
+    cssMinify: true,
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -17,6 +23,8 @@ export default defineConfig({
           if (/[/\\]three[/\\]/.test(id)) {
             return 'three'
           }
+          if (id.includes('react-dom')) return 'react-dom'
+          if (/[/\\]node_modules[/\\]react[/\\]/.test(id)) return 'react'
         },
       },
     },

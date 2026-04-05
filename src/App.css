@@ -72,6 +72,12 @@ body {
   position: relative;
   z-index: 1;
   max-width: min(100%, 42%);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 0.5rem;
+  row-gap: 0.5rem;
 }
 
 .app-header-timer {
@@ -172,27 +178,61 @@ body {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
+/* Centered timer overlaps the logo on mid-width viewports — tuck it to the right. */
+@media (max-width: 1350px) {
+  .app-header {
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .app-logo {
+    max-width: min(48%, 22rem);
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  .app-header-timer {
+    position: static;
+    transform: none;
+    margin-left: auto;
+    align-items: flex-end;
+    text-align: right;
+    padding: 0.75rem 0;
+  }
+
+  .app-header-timer__title {
+    padding: 0 0 0.75rem;
+  }
+
+  .app-header-timer__datetime {
+    padding: 0;
+  }
+}
+
 .app-logo h1 {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
   font-size: 2.5rem;
   font-weight: bold;
-  margin-bottom: 0.5rem;
   color: var(--nasa-white);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 .app-logo-mars {
-  width: 1em;
-  height: 1em;
+  grid-column: 1;
+  grid-row: 1;
+  width: 2.5rem;
+  height: 2.5rem;
   object-fit: contain;
-  flex-shrink: 0;
-  margin-right: 0.2em;
+  align-self: center;
   transform: translateY(0.08em);
 }
 
 .app-logo p {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin: 0;
   font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.88);
   font-weight: 400;
@@ -838,13 +878,14 @@ body {
 @media (max-width: 768px) {
   .app-header {
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
     min-height: unset;
     gap: 0.75rem;
   }
 
   .app-logo {
     max-width: 100%;
+    text-align: center;
   }
 
   .app-header-timer {
@@ -852,6 +893,16 @@ body {
     transform: none;
     align-self: center;
     width: 100%;
+    align-items: center;
+    text-align: center;
+  }
+
+  .app-header-timer__title {
+    padding: 0 0.5rem 0.75rem;
+  }
+
+  .app-header-timer__datetime {
+    padding: 0 0.5rem;
   }
 
   .app-main {
@@ -860,6 +911,11 @@ body {
   
   .app-logo h1 {
     font-size: 2rem;
+  }
+
+  .app-logo-mars {
+    width: 2rem;
+    height: 2rem;
   }
   
   .grid-cell {
@@ -887,6 +943,22 @@ body {
   .grid-legend {
     flex-direction: column;
     gap: 1rem;
+  }
+}
+
+@media (max-width: 410px) {
+  .app-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+  }
+
+  .app-logo-mars {
+    transform: none;
+    width: 2.75rem;
+    height: 2.75rem;
   }
 }
 

@@ -56,11 +56,9 @@ export default function MissionControl({
     <div className="app">
       <header className="app-header">
         <div className="app-logo">
-          <h1>
-            <img src={marsLogo} alt="" className="app-logo-mars" aria-hidden />
-            Mars Rover Control
-          </h1>
+          <h1>Mars Rover Control</h1>
           <p>Mission Control Center</p>
+          <img src={marsLogo} alt="" className="app-logo-mars" aria-hidden />
         </div>
         <div className="app-header-timer" aria-live="polite" aria-atomic="true">
           <p className="app-header-timer__title">Mars Rover Mission Elapsed Time</p>

@@ -1,6 +1,12 @@
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import * as THREE from 'three'
+import {
+  AdditiveBlending,
+  BufferAttribute,
+  BufferGeometry,
+  Group,
+  ShaderMaterial,
+} from 'three'
 
 const VS = /* glsl */ `
   uniform float uTime;
@@ -138,39 +144,46 @@ function buildStarLayers(
 
 type RealisticStarfieldProps = {
   reducedMotion: boolean
+  liteGraphics?: boolean
 }
 
-export function RealisticStarfield({ reducedMotion }: RealisticStarfieldProps) {
-  const groupRef = useRef<THREE.Group>(null)
-  const matRef = useRef<THREE.ShaderMaterial>(null)
+export function RealisticStarfield({
+  reducedMotion,
+  liteGraphics = false,
+}: RealisticStarfieldProps) {
+  const groupRef = useRef<Group>(null)
+  const matRef = useRef<ShaderMaterial>(null)
 
-  const count = reducedMotion ? 2800 : 8000
+  /* Lower counts = faster init + lighter GPU vs old 8k / 2.8k / 900. */
+  const count = liteGraphics ? 350 : reducedMotion ? 900 : 2200
+  const twinkleOff = reducedMotion || liteGraphics
+  const stillStars = reducedMotion || liteGraphics
 
   const geometry = useMemo(() => {
     const { positions, aSize, aColor, aPhase, aSpeed } = buildStarLayers(count, [155, 118, 86], [0.52, 0.32, 0.16])
 
-    const geo = new THREE.BufferGeometry()
-    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-    geo.setAttribute('aSize', new THREE.BufferAttribute(aSize, 1))
-    geo.setAttribute('aColor', new THREE.BufferAttribute(aColor, 3))
-    geo.setAttribute('aPhase', new THREE.BufferAttribute(aPhase, 1))
-    geo.setAttribute('aSpeed', new THREE.BufferAttribute(aSpeed, 1))
+    const geo = new BufferGeometry()
+    geo.setAttribute('position', new BufferAttribute(positions, 3))
+    geo.setAttribute('aSize', new BufferAttribute(aSize, 1))
+    geo.setAttribute('aColor', new BufferAttribute(aColor, 3))
+    geo.setAttribute('aPhase', new BufferAttribute(aPhase, 1))
+    geo.setAttribute('aSpeed', new BufferAttribute(aSpeed, 1))
     return geo
   }, [count])
 
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
-      uTwinkle: { value: reducedMotion ? 0 : 1 },
+      uTwinkle: { value: twinkleOff ? 0 : 1 },
     }),
-    [reducedMotion]
+    [twinkleOff]
   )
 
   useFrame((state) => {
-    if (matRef.current) {
+    if (matRef.current && !twinkleOff) {
       matRef.current.uniforms.uTime.value = state.clock.elapsedTime
     }
-    if (groupRef.current && !reducedMotion) {
+    if (groupRef.current && !stillStars) {
       groupRef.current.rotation.y = state.clock.elapsedTime * 0.018
       groupRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.04) * 0.012
     }
@@ -187,7 +200,7 @@ export function RealisticStarfield({ reducedMotion }: RealisticStarfieldProps) {
           transparent
           depthWrite={false}
           depthTest={true}
-          blending={THREE.AdditiveBlending}
+          blending={AdditiveBlending}
           toneMapped={false}
         />
       </points>

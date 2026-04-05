@@ -8,81 +8,10 @@
   background: #050810;
 }
 
-/*
- * Welcome layer: solid black curtain (never transparent) so WebGL is not visible during load.
- * Only the "Welcome" text fades in — see LandingPage.tsx + .landing-canvas--concealed.
- */
-.landing-boot {
+.landing-webgl-stack {
   position: absolute;
   inset: 0;
-  z-index: 10002;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  pointer-events: auto;
-  cursor: default;
-  background: #000;
-  opacity: 1;
-}
-
-.landing-boot__welcome {
-  margin: 0;
-  font-size: clamp(2rem, 6.5vw, 3.5rem);
-  font-weight: 500;
-  letter-spacing: 0.48em;
-  padding-left: 0.48em;
-  text-transform: uppercase;
-  color: rgba(248, 250, 255, 0.96);
-  text-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.06),
-    0 24px 56px rgba(0, 0, 0, 0.45),
-    0 0 72px rgba(255, 255, 255, 0.04);
-  opacity: 0;
-  animation: landing-boot-text-reveal 1.35s cubic-bezier(0.42, 0, 0.58, 1) forwards;
-}
-
-@keyframes landing-boot-text-reveal {
-  0% {
-    opacity: 0;
-  }
-  14% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-/* Dismiss: interpolates from current opacity (intro may still be running). */
-@keyframes landing-boot-fadeout {
-  to {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
-}
-
-.landing-boot--exit {
-  animation: landing-boot-fadeout 0.7s cubic-bezier(0.33, 0, 0.2, 1) forwards !important;
-  cursor: default;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .landing-boot {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
-
-  .landing-boot__welcome {
-    animation: none;
-    opacity: 0;
-  }
-
-  .landing-boot--exit {
-    animation: landing-boot-fadeout 0.01s linear forwards !important;
-  }
+  z-index: 0;
 }
 
 .landing-canvas {
@@ -92,16 +21,28 @@
   width: 100%;
   height: 100%;
   display: block;
-  transition:
-    opacity 0.45s cubic-bezier(0.33, 0, 0.2, 1),
-    visibility 0.45s cubic-bezier(0.33, 0, 0.2, 1);
 }
 
-/* Hide canvas until scene + assets are ready (WebGL may still render off-screen). */
-.landing-canvas--concealed {
-  opacity: 0;
-  visibility: hidden;
+/* Fades out to reveal the WebGL scene (content appears to fade in from black). */
+.landing-webgl-fade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #000;
   pointer-events: none;
+  opacity: 1;
+  will-change: opacity;
+  transition: opacity 1.05s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.landing-webgl-fade--out {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-webgl-fade {
+    transition: opacity 0.2s ease-out;
+  }
 }
 
 .landing-overlay {
@@ -215,6 +156,17 @@
   }
 }
 
+/* Lite WebGL profile: drop compositor-heavy CSS on weak GPUs (see landingPerf.ts). */
+.landing-page--lite .landing-title__line,
+.landing-page--lite .landing-title__accent {
+  animation: none;
+}
+
+.landing-page--lite .landing-badge {
+  backdrop-filter: none;
+  background: rgba(5, 8, 16, 0.82);
+}
+
 .landing-tagline {
   margin: 1.25rem 0 0;
   font-size: clamp(0.9rem, 2.1vw, 1.05rem);
@@ -321,10 +273,6 @@
 }
 
 @media (max-width: 500px) {
-  .landing-boot__welcome {
-    font-size: clamp(2.2rem, 7.2vw, 3.6rem);
-  }
-
   .landing-badge {
     font-size: clamp(0.72rem, 1.65vw, 0.82rem);
   }
