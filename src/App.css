@@ -614,12 +614,7 @@ body {
 }
 
 .grid-cell.rover-here {
-  background: linear-gradient(
-    165deg,
-    var(--nasa-blue-dark) 0%,
-    var(--nasa-blue) 48%,
-    var(--nasa-blue-light) 100%
-  ) !important;
+  background: var(--nasa-blue) !important;
   border-color: rgba(14, 76, 179, 0.75) !important;
   box-shadow:
     0 0 14px var(--map-rover-halo),
@@ -638,7 +633,7 @@ body {
 /* Dual rim: NASA blue (vehicle) + NASA red boundary — hairline only */
 .grid-cell.rover-here.perimeter {
   background:
-    linear-gradient(195deg, var(--nasa-blue-dark) 0%, var(--nasa-blue) 42%, #0a1630 100%) padding-box,
+    linear-gradient(var(--nasa-blue), var(--nasa-blue)) padding-box,
     linear-gradient(118deg, rgba(14, 76, 179, 0.75), rgba(252, 61, 33, 0.38)) border-box !important;
   border: 1px solid transparent !important;
   background-clip: padding-box, border-box !important;
@@ -707,7 +702,7 @@ body {
 }
 
 .legend-color.rover-here {
-  background: linear-gradient(165deg, var(--nasa-blue-dark) 0%, var(--nasa-blue-light) 100%);
+  background: var(--nasa-blue);
   border-color: rgba(14, 76, 179, 0.75);
   box-shadow: 0 0 8px var(--map-rover-halo);
 }
