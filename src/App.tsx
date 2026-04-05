@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
-import './App.css';
 import type { Direction, GridCell, MissionLogEntry, RoverState } from './missionTypes'
 import LandingPage from './components/LandingPage/LandingPage'
 

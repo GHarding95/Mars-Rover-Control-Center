@@ -1,6 +1,5 @@
 :root {
-  font-family: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI',
-    sans-serif;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -73,4 +72,15 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+/* MissionControl lazy chunk: shown until App.css loads */
+.mission-control-fallback {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #17171b;
+  color: #8e98ab;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }

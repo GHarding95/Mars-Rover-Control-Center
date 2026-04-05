@@ -1,4 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react'
+import './App.css'
 import marsLogo from './assets/Mars.png'
 import RoverStatus from './components/RoverStatus'
 import DirectionCompass from './components/DirectionCompass'

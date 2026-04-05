@@ -4,7 +4,7 @@ import {
   useEffect,
   useState,
 } from 'react'
-import { getLandingPerfProfile } from './landingPerf'
+import { getLandingPerfProfile, shouldSkipHeavyWebGL } from './landingPerf'
 import './LandingPage.css'
 
 const LandingCanvas = lazy(() => import('./LandingCanvas'))
@@ -27,6 +27,7 @@ function readNarrowLandingLayout(): boolean {
 
 export default function LandingPage({ onEnter }: LandingPageProps) {
   const [perfProfile] = useState(() => getLandingPerfProfile())
+  const [skipWebGLForNetwork] = useState(() => shouldSkipHeavyWebGL())
   const liteGraphics = perfProfile === 'lite'
   const [reducedMotion, setReducedMotion] = useState(() => readReducedMotion())
   const [narrowLayout, setNarrowLayout] = useState(() => readNarrowLandingLayout())
@@ -34,7 +35,7 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
   const [canvasReady, setCanvasReady] = useState(false)
 
   useEffect(() => {
-    if (reducedMotion) {
+    if (reducedMotion || skipWebGLForNetwork) {
       setCanvasReady(false)
       return
     }
@@ -54,7 +55,7 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
       cancelled = true
       window.clearTimeout(tid)
     }
-  }, [reducedMotion])
+  }, [reducedMotion, skipWebGLForNetwork])
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')

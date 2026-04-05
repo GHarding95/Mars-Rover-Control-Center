@@ -2,8 +2,7 @@
 /* Mission Log entry stripes: fixed green / blue / red hex in .history-entry* only — do not retune. */
 
 :root {
-  --font-sans: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI',
-    sans-serif;
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
   /* Canvas (locked) */
   --app-bg: #17171b;
@@ -1139,13 +1138,3 @@ body {
   width: 100%;
 }
 
-/* Lazy-route fallback (styles live here so they apply before chunk CSS loads) */
-.mission-control-fallback {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--app-bg);
-  color: var(--nasa-muted);
-  font-family: var(--font-sans);
-}
