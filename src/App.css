@@ -404,7 +404,7 @@ body {
 .status-item {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  align-items: start;
+  align-items: center;
   gap: 0.5rem 0.75rem;
   padding: 0.8rem;
   background: rgba(0, 0, 0, 0.22);
