@@ -2,7 +2,8 @@
 /* Mission Log entry stripes: fixed green / blue / red hex in .history-entry* only — do not retune. */
 
 :root {
-  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI',
+    sans-serif;
 
   /* Canvas (locked) */
   --app-bg: #17171b;
