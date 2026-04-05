@@ -58,19 +58,29 @@ const MissionCommands: React.FC<MissionCommandsProps> = ({
     <div className="command-section">
       <h2>Mission Commands</h2>
       <p className="command-help">Enter up to 5 commands (e.g., "50m", "East", "25m", "South", "4m")</p>
-      <div className="command-inputs">
+      <form
+        className="command-inputs"
+        autoComplete="off"
+        onSubmit={e => e.preventDefault()}
+      >
         {commands.map((command, index) => (
           <input
             key={index}
             type="text"
+            name={`mission-command-${index + 1}`}
             value={command}
             onChange={e => onCommandChange(index, e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={`Command ${index + 1}`}
             className="command-input"
+            autoComplete="off"
+            inputMode="text"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
           />
         ))}
-      </div>
+      </form>
       {error && (
         <div className="error-message">
           <p>{error}</p>
