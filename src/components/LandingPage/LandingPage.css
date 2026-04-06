@@ -252,7 +252,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(0.2rem, 0.6vh + 0.1rem, 0.35rem);
+  justify-content: center;
+  gap: 0;
   padding: clamp(0.55rem, 1.1vw + 1vh, 1.15rem) clamp(1rem, 5vw + 0.5vh, 2.5rem)
     clamp(0.6rem, 1.15vw + 1.05vh, 1.25rem);
   min-width: min(90vw, 22rem);
@@ -298,19 +299,10 @@
 
 .landing-enter-btn__label {
   position: relative;
-  font-size: clamp(0.85rem, 1.15vw + 0.7vh, 1.15rem);
+  font-size: clamp(1rem, 1.35vw + 0.85vh, 1.35rem);
   font-weight: 700;
   letter-spacing: clamp(0.07em, 0.12vw + 0.06em, 0.12em);
   text-transform: uppercase;
-}
-
-.landing-enter-btn__sub {
-  position: relative;
-  font-size: clamp(0.58rem, 0.35vw + 0.55vh, 0.8rem);
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  opacity: 0.75;
-  color: rgba(255, 255, 255, 0.85);
 }
 
 .landing-footer-block {
@@ -395,7 +387,7 @@
   }
 
   .landing-enter-btn {
-    gap: clamp(0.19rem, 0.54vh + 0.09rem, 0.34rem);
+    gap: 0;
     padding: clamp(0.5rem, 1.05vw + 0.92vh, 1.1rem) clamp(0.95rem, 4.75vw + 0.48vh, 2.4rem)
       clamp(0.55rem, 1.12vw + 1vh, 1.2rem);
     min-width: min(89vw, 21.5rem);
@@ -406,11 +398,7 @@
   }
 
   .landing-enter-btn__label {
-    font-size: clamp(0.82rem, 1.12vw + 0.66vh, 1.13rem);
-  }
-
-  .landing-enter-btn__sub {
-    font-size: clamp(0.57rem, 0.34vw + 0.54vh, 0.78rem);
+    font-size: clamp(0.95rem, 1.28vw + 0.78vh, 1.3rem);
   }
 
   .landing-footer-block {
@@ -465,7 +453,7 @@
   }
 
   .landing-enter-btn {
-    gap: clamp(0.17rem, 0.5vh + 0.08rem, 0.32rem);
+    gap: 0;
     padding: clamp(0.46rem, 1vw + 0.85vh, 1.02rem) clamp(0.88rem, 4.35vw + 0.42vh, 2.2rem)
       clamp(0.52rem, 1.08vw + 0.92vh, 1.12rem);
     min-width: min(88vw, 20.5rem);
@@ -476,11 +464,7 @@
   }
 
   .landing-enter-btn__label {
-    font-size: clamp(0.78rem, 1.06vw + 0.62vh, 1.08rem);
-  }
-
-  .landing-enter-btn__sub {
-    font-size: clamp(0.55rem, 0.32vw + 0.5vh, 0.76rem);
+    font-size: clamp(0.9rem, 1.2vw + 0.72vh, 1.22rem);
   }
 
   .landing-footer-block {
@@ -589,7 +573,7 @@
   }
 
   .landing-enter-btn {
-    gap: calc((0.12rem + 0.32vh) * var(--landing-vh-scale));
+    gap: 0;
     padding: calc((0.34rem + 0.75vw + 0.55vh) * var(--landing-vh-scale))
       calc((0.72rem + 3.2vw) * var(--landing-vh-scale))
       calc((0.38rem + 0.8vw + 0.62vh) * var(--landing-vh-scale));
@@ -602,16 +586,8 @@
   }
 
   .landing-enter-btn__label {
-    font-size: max(0.58rem, calc((0.72rem + 0.85vw + 0.42vh) * var(--landing-vh-scale)));
+    font-size: max(0.65rem, calc((0.88rem + 1vw + 0.5vh) * var(--landing-vh-scale)));
     letter-spacing: clamp(0.04em, 0.06em + 0.04em * var(--landing-vh-scale), 0.11em);
-  }
-
-  .landing-enter-btn__sub {
-    font-size: max(
-      0.4rem,
-      min(0.8rem, calc((0.46rem + 0.2vw + 0.3vh) * var(--landing-vh-scale)))
-    );
-    letter-spacing: clamp(0.04em, 0.06em * var(--landing-vh-scale), 0.08em);
   }
 
   .landing-footer-block {

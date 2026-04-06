@@ -135,7 +135,6 @@ export default function LandingPage({ onEnter }: LandingPageProps) {
             onClick={onEnter}
           >
             <span className="landing-enter-btn__label">Enter Mission Control</span>
-            <span className="landing-enter-btn__sub">Press to initialise console</span>
           </button>
         </div>
 
