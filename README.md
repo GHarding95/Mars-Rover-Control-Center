@@ -1,6 +1,6 @@
 # 🚀 Mars Rover Control Center
 
-This is a fully mobile responsive React + TypeScript web app with a Three.JS landing page, Mission Control where you can command a virtual Mars Rover across a 100x100 meter grid, track the Rover status, send up to 5 commands at once, change direction using an interactive compass, browse a draggable grid & review commands in the Mission Log.
+This is a fully mobile responsive React + TypeScript web app with a Three.JS landing page, Mission Control where you can command a virtual Mars Rover across a 100x100 meter grid, track the Rover status, send up to 5 commands at once, change direction using an interactive compass, browse a draggable grid & review commands in the Mission Log. Elapsed time is tracked at the top and all actions are timestamped in the mission log, session is saved in local storage until the 'Reset Rover' button is used.
 
 https://mars-rover-control-center.vercel.app/
 
